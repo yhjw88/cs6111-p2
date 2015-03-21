@@ -4,8 +4,11 @@ import json
 import sys
 import argparse
 
-INFOBOX = "INFOBOX"
-QUESTION = "QUESTION"
+INFOBOX = "infobox"
+QUESTION = "question"
+USAGE = ("python query.py -key <Freebase API Key> -q <query> -t <infobox|question>\n" 
+        "       python query.py -key <Freebase API Key> -f <file of queries> -t <infobox|question>\n" 
+        "       python query.py -key <Freebase API Key>")
 
 #def makeQuery(key, query):
 #    """
@@ -86,19 +89,23 @@ QUESTION = "QUESTION"
 #            print "Precision reached, exiting"
 #            return
 
-def usage():
-    print "Usage: python query.py -key <Freebase API Key> -q <query> -t <infobox|question>"
-    print "Usage: python query.py -key <Freebase API Key> -f <file of queries> -t <infobox|question>"
-    print "Usage: python query.py -key <Freebase API Key>"
-
 if __name__ == "__main__":
     """
     Entry point, processes parameters
     """
 
-    parser = argparse.ArgumentParser(description="Does Freebase queries.")
+    # Argument parsing
+    parser = argparse.ArgumentParser(description="Does Freebase queries.", usage=USAGE)
     parser.add_argument("-key", required=True, dest="key")
     parser.add_argument("-q", dest="query")
     parser.add_argument("-f", dest="fileName")
-    parser.add_argument("-t", dest="type")
+    parser.add_argument("-t", dest="queryType", choices=[INFOBOX, QUESTION])
+    args = parser.parse_args()
+    if (args.query or args.fileName) and not args.queryType:
+        parser.error("-t must be set in order to use -q or -f")
+    if not (args.query or args.fileName) and args.queryType:
+        parser.error("-q or -f must be set in order to use -t")
+    if args.query and args.fileName:
+        parser.error("-q and -f cannot both be set")
     
+    # Do actual work
