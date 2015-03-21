@@ -6,6 +6,7 @@ import argparse
 
 INFOBOX = "infobox"
 QUESTION = "question"
+INTERACTIVE = "interactive"
 USAGE = ("python query.py -key <Freebase API Key> -q <query> -t <infobox|question>\n" 
         "       python query.py -key <Freebase API Key> -f <file of queries> -t <infobox|question>\n" 
         "       python query.py -key <Freebase API Key>")
@@ -89,6 +90,16 @@ USAGE = ("python query.py -key <Freebase API Key> -q <query> -t <infobox|questio
 #            print "Precision reached, exiting"
 #            return
 
+def getInfobox(query, key):
+    """
+    Makes the query and displays the infobox before returning
+    @param query
+    @param key
+    @return True if successful, False if failed
+    """
+
+    return True
+
 if __name__ == "__main__":
     """
     Entry point, processes parameters
@@ -107,5 +118,9 @@ if __name__ == "__main__":
         parser.error("-q or -f must be set in order to use -t")
     if args.query and args.fileName:
         parser.error("-q and -f cannot both be set")
-    
+
     # Do actual work
+    # TODO: Do file and question mode
+    # TODO: Apparently interactive mode not required so...
+    if args.query and args.queryType == INFOBOX:
+        getInfobox(args.query, args.key)
