@@ -4,12 +4,31 @@ import json
 import sys
 import argparse
 
+# Usage constants
 INFOBOX = "infobox"
 QUESTION = "question"
 INTERACTIVE = "interactive"
 USAGE = ("python query.py -key <Freebase API Key> -q <query> -t <infobox|question>\n" 
         "       python query.py -key <Freebase API Key> -f <file of queries> -t <infobox|question>\n" 
         "       python query.py -key <Freebase API Key>")
+# Freebase Entity Types
+PERSON = 0
+AUTHOR = 1
+ACTOR = 2
+BUSINESSPERSON = 3
+LEAGUE = 4
+SPORTSTEAM = 5
+FETTOINDEX = {
+            "/people/person":PERSON,
+            "/book/author":AUTHOR,
+            "/film/actor":ACTOR,
+            "/tv/tv_actor":ACTOR,
+            "/organization/organization_founder":BUSINESSPERSON,
+            "/business/board_member":BUSINESSPERSON,
+            "/sports/sports_league":LEAGUE,
+            "/sports/sports_team":SPORTSTEAM,
+            "/sports/professional_sports_team":SPORTSTEAM
+            }
 
 #def search(key, precision, query):
 #    """
@@ -89,14 +108,80 @@ def freebaseSearch(query, key):
         print "Error with Freebase Search URL request: %s" % e.reason
         return None
     
-    response = json.loads(html)
-    results = response["result"]
+    jsonResults = json.loads(html)
+    results = jsonResults["result"]
     if len(results) == 0:
-        print "No results for query \"%s\"" % query
+        print "No results for query: %s" % query
         return None
     
     return results
 
+def getEntityTypes(properties):
+    """
+    Given the property portion from the Freebase Topic query
+    This will return an array 
+    True is stored at the index of each corresponding entity type found 
+    @param properties
+    @return The boolean array entityTypes
+    """
+    entityTypes = [False] * 6
+    values = properties["/type/object/type"]["values"]
+    
+    for value in values:
+        if value["id"] in FETTOINDEX:
+            entityTypes[FETTOINDEX[value["id"]]] = True
+    
+    return entityTypes
+
+def freebaseTopic(mid, key):
+    """
+    Queries the Freebase Topic API for infobox
+    Will return True iff successfully finds entity and prints out infobox
+    @param mid
+    @return True if successful, False if failed
+    """
+    # Query Freebase Topic
+    freebaseUrl = "https://www.googleapis.com/freebase/v1/topic" + mid
+    params = {"key": key}
+    url = freebaseUrl + '?' + urllib.urlencode(params)
+    html = ""
+    try:
+        response = urllib2.urlopen(url)
+        html = response.read()
+    except urllib2.URLError as e:
+        print "Error with Freebase Topic URL request: %s" % e.reason
+        return False
+    results = json.loads(html)
+    if "property" not in results:
+        return False
+    properties = results["property"]
+    
+    # Get Entity Types
+    entityTypes = getEntityTypes(properties)
+    success = False
+    for value in entityTypes:
+        if value:
+            success = True
+            break
+    if not success:
+        return False
+    
+    # TODO: Get infobox properties
+    if entityTypes[PERSON]:
+        print "Person"
+    if entityTypes[AUTHOR]:
+        print "Author"
+    if entityTypes[ACTOR]:
+        print "Actor"
+    if entityTypes[BUSINESSPERSON]:
+        print "Business Person"
+    if entityTypes[LEAGUE]:
+        print "League"
+    if entityTypes[SPORTSTEAM]:
+        print "Sports Team"
+
+    return True
+      
 def getInfobox(query, key):
     """
     Makes the query and displays the infobox before returning
@@ -107,8 +192,15 @@ def getInfobox(query, key):
     results = freebaseSearch(query, key)
     if not results:
         return False
-
-    print json.dumps(results, indent=4)
+    
+    success = False
+    for result in results:
+        success = freebaseTopic(result["mid"], key)
+        if success:
+            break
+    if not success:
+        print "No entities of interest matching the given query: %s" % query
+        return False
 
     return True
 
