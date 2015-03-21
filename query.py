@@ -11,25 +11,6 @@ USAGE = ("python query.py -key <Freebase API Key> -q <query> -t <infobox|questio
         "       python query.py -key <Freebase API Key> -f <file of queries> -t <infobox|question>\n" 
         "       python query.py -key <Freebase API Key>")
 
-#def makeQuery(key, query):
-#    """
-#    Sends the query to Bing
-#    @param key The Bing key
-#    @param query The query, as a string
-#    @return The results list returned in JSON format, ie ['d']['results']
-#    """
-#    getQuery = {'Query': ('\'' + query + '\'')}
-#    bingUrl = 'https://api.datamarket.azure.com/Bing/Search/Web?' \
-#              + urllib.urlencode(getQuery) + '&$top=' \
-#              + str(NUMRESULTS) + '&$format=json'
-#    accountKeyEnc = base64.b64encode(key + ':' + key)
-#    headers = {'Authorization': 'Basic ' + accountKeyEnc}
-#    req = urllib2.Request(bingUrl, headers = headers)
-#    response = urllib2.urlopen(req)
-#    content = response.read()
-#    json_content = json.loads(content)
-#    return json_content['d']['results']
-#
 #def search(key, precision, query):
 #    """
 #    Performs the actual loop of querying, asking user, query expansion
@@ -90,6 +71,32 @@ USAGE = ("python query.py -key <Freebase API Key> -q <query> -t <infobox|questio
 #            print "Precision reached, exiting"
 #            return
 
+def freebaseSearch(query, key):
+    """
+    Queries the Freebase Search API 
+    @param query
+    @param key
+    @return The result array of results, or None if none
+    """
+    freebaseUrl = "https://www.googleapis.com/freebase/v1/search"
+    params = {"query": query, "key": key}
+    url = freebaseUrl + '?' + urllib.urlencode(params)
+    html = ""
+    try:
+        response = urllib2.urlopen(url)
+        html = response.read()
+    except urllib2.URLError as e:
+        print "Error with Freebase Search URL request: %s" % e.reason
+        return None
+    
+    response = json.loads(html)
+    results = response["result"]
+    if len(results) == 0:
+        print "No results for query \"%s\"" % query
+        return None
+    
+    return results
+
 def getInfobox(query, key):
     """
     Makes the query and displays the infobox before returning
@@ -97,6 +104,11 @@ def getInfobox(query, key):
     @param key
     @return True if successful, False if failed
     """
+    results = freebaseSearch(query, key)
+    if not results:
+        return False
+
+    print json.dumps(results, indent=4)
 
     return True
 
