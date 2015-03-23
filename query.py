@@ -8,8 +8,8 @@ import argparse
 INFOBOX = "infobox"
 QUESTION = "question"
 INTERACTIVE = "interactive"
-USAGE = ("python query.py -key <Freebase API Key> -q <query> -t <infobox|question>\n" 
-        "       python query.py -key <Freebase API Key> -f <file of queries> -t <infobox|question>\n" 
+USAGE = ("python query.py -key <Freebase API Key> -q <query> -t <infobox|question>\n"
+        "       python query.py -key <Freebase API Key> -f <file of queries> -t <infobox|question>\n"
         "       python query.py -key <Freebase API Key>")
 # Freebase Entity Types
 PERSON = 0
@@ -29,6 +29,65 @@ FETTOINDEX = {
             "/sports/sports_team":SPORTSTEAM,
             "/sports/professional_sports_team":SPORTSTEAM
             }
+
+def getAnswer(query, key):
+	# extract entity from question query
+	entity = query[12:]
+	entity = entity[:-1]
+
+	# search for authors with written works whose name contains the entity
+	service_url = 'https://www.googleapis.com/freebase/v1/mqlread'
+	query1 = [{
+						"/book/author/works_written": [{
+								"a:name": None,
+								"name~=": entity
+						}],
+						"name": None,
+						"type": "/book/author"
+					}]
+	params1 = {
+							'query': json.dumps(query1),
+							'key': key
+						}
+	url1 = service_url + '?' + urllib.urlencode(params1)
+	response1 = json.loads(urllib.urlopen(url1).read())
+
+	# search for organization founders with organizations whose name contains the entity
+	query2 = [{
+						"/organization/organization_founder/organizations_founded": [{
+							"a:name": None,
+							"name~=": "Google"
+						}],
+						"name": None,
+						"type": "/organization/organization_founder"
+					}]
+	params2 = {
+							'query': json.dumps(query2),
+							'key': key
+						}
+	url2 = service_url + '?' + urllib.urlencode(params2)
+	response2 = json.loads(urllib.urlopen(url2).read())
+
+	# merge the two responses and sort by creator name
+	response = response1["result"] + response2["result"]
+	response.sort(key=lambda x: x["name"])
+
+	# output the results
+	# TODO: format output as "first, second, ..., and last"
+	i = 1
+	for creator in response:
+		out = str(i) + ". " + creator['name']
+		if creator['type'] == "/book/author":
+			out = out + " (as Author) created "
+			for work in creator["/book/author/works_written"]:
+				out = out + "<" + work["a:name"] + ">, "
+		elif creator['type'] == "/organization/organization_founder":
+			out = out + " (as BusinessPerson) created "
+			for org in creator["/organization/organization_founder/organizations_founded"]:
+				out = out + "<" + org["a:name"] + ">, "
+		print out
+		i = i + 1
+
 
 #def search(key, precision, query):
 #    """
@@ -92,7 +151,7 @@ FETTOINDEX = {
 
 def freebaseSearch(query, key):
     """
-    Queries the Freebase Search API 
+    Queries the Freebase Search API
     @param query
     @param key
     @return The result array of results, or None if none
@@ -107,30 +166,30 @@ def freebaseSearch(query, key):
     except urllib2.URLError as e:
         print "Error with Freebase Search URL request: %s" % e.reason
         return None
-    
+
     jsonResults = json.loads(html)
     results = jsonResults["result"]
     if len(results) == 0:
         print "No results for query: %s" % query
         return None
-    
+
     return results
 
 def getEntityTypes(properties):
     """
     Given the property portion from the Freebase Topic query
-    This will return an array 
-    True is stored at the index of each corresponding entity type found 
+    This will return an array
+    True is stored at the index of each corresponding entity type found
     @param properties
     @return The boolean array entityTypes
     """
     entityTypes = [False] * 6
     values = properties["/type/object/type"]["values"]
-    
+
     for value in values:
         if value["id"] in FETTOINDEX:
             entityTypes[FETTOINDEX[value["id"]]] = True
-    
+
     return entityTypes
 
 def freebaseTopic(mid, key):
@@ -155,7 +214,7 @@ def freebaseTopic(mid, key):
     if "property" not in results:
         return False
     properties = results["property"]
-    
+
     # Get Entity Types
     entityTypes = getEntityTypes(properties)
     success = False
@@ -165,7 +224,7 @@ def freebaseTopic(mid, key):
             break
     if not success:
         return False
-    
+
     # TODO: Get infobox properties
     if entityTypes[PERSON]:
         print "Person"
@@ -181,7 +240,7 @@ def freebaseTopic(mid, key):
         print "Sports Team"
 
     return True
-      
+
 def getInfobox(query, key):
     """
     Makes the query and displays the infobox before returning
@@ -192,7 +251,7 @@ def getInfobox(query, key):
     results = freebaseSearch(query, key)
     if not results:
         return False
-    
+
     success = False
     for result in results:
         success = freebaseTopic(result["mid"], key)
@@ -228,3 +287,6 @@ if __name__ == "__main__":
     # TODO: Apparently interactive mode not required so...
     if args.query and args.queryType == INFOBOX:
         getInfobox(args.query, args.key)
+    elif args.query and args.queryType == QUESTION:
+				getAnswer(args.query, args.key)
+
