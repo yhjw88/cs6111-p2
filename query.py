@@ -224,7 +224,7 @@ def freebaseTopic(mid, key):
             break
     if not success:
         return False
-    
+
     # TODO: Formatting
     # TODO: Get infobox properties
     if entityTypes[PERSON]:
