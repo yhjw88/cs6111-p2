@@ -31,62 +31,62 @@ FETTOINDEX = {
             }
 
 def getAnswer(query, key):
-	# extract entity from question query
-	entity = query[12:]
-	entity = entity[:-1]
+    # extract entity from question query
+    entity = query[12:]
+    entity = entity[:-1]
 
-	# search for authors with written works whose name contains the entity
-	service_url = 'https://www.googleapis.com/freebase/v1/mqlread'
-	query1 = [{
-						"/book/author/works_written": [{
-								"a:name": None,
-								"name~=": entity
-						}],
-						"name": None,
-						"type": "/book/author"
-					}]
-	params1 = {
-							'query': json.dumps(query1),
-							'key': key
-						}
-	url1 = service_url + '?' + urllib.urlencode(params1)
-	response1 = json.loads(urllib.urlopen(url1).read())
+    # search for authors with written works whose name contains the entity
+    service_url = 'https://www.googleapis.com/freebase/v1/mqlread'
+    query1 = [{
+                "/book/author/works_written": [{
+                  "a:name": None,
+                  "name~=": entity
+                }],
+                "name": None,
+                "type": "/book/author"
+              }]
+    params1 = {
+                'query': json.dumps(query1),
+                'key': key
+              }
+    url1 = service_url + '?' + urllib.urlencode(params1)
+    response1 = json.loads(urllib.urlopen(url1).read())
 
-	# search for organization founders with organizations whose name contains the entity
-	query2 = [{
-						"/organization/organization_founder/organizations_founded": [{
-							"a:name": None,
-							"name~=": "Google"
-						}],
-						"name": None,
-						"type": "/organization/organization_founder"
-					}]
-	params2 = {
-							'query': json.dumps(query2),
-							'key': key
-						}
-	url2 = service_url + '?' + urllib.urlencode(params2)
-	response2 = json.loads(urllib.urlopen(url2).read())
+    # search for organization founders with organizations whose name contains the entity
+    query2 = [{
+                "/organization/organization_founder/organizations_founded": [{
+                  "a:name": None,
+                  "name~=": "Google"
+                }],
+                "name": None,
+                "type": "/organization/organization_founder"
+              }]
+    params2 = {
+                'query': json.dumps(query2),
+                'key': key
+              }
+    url2 = service_url + '?' + urllib.urlencode(params2)
+    response2 = json.loads(urllib.urlopen(url2).read())
 
-	# merge the two responses and sort by creator name
-	response = response1["result"] + response2["result"]
-	response.sort(key=lambda x: x["name"])
+    # merge the two responses and sort by creator name
+    response = response1["result"] + response2["result"]
+    response.sort(key=lambda x: x["name"])
 
-	# output the results
-	# TODO: format output as "first, second, ..., and last"
-	i = 1
-	for creator in response:
-		out = str(i) + ". " + creator['name']
-		if creator['type'] == "/book/author":
-			out = out + " (as Author) created "
-			for work in creator["/book/author/works_written"]:
-				out = out + "<" + work["a:name"] + ">, "
-		elif creator['type'] == "/organization/organization_founder":
-			out = out + " (as BusinessPerson) created "
-			for org in creator["/organization/organization_founder/organizations_founded"]:
-				out = out + "<" + org["a:name"] + ">, "
-		print out
-		i = i + 1
+    # output the results
+    # TODO: format output as "first, second, ..., and last"
+    i = 1
+    for creator in response:
+        out = str(i) + ". " + creator['name']
+        if creator['type'] == "/book/author":
+            out = out + " (as Author) created "
+            for work in creator["/book/author/works_written"]:
+                out = out + "<" + work["a:name"] + ">, "
+        elif creator['type'] == "/organization/organization_founder":
+            out = out + " (as BusinessPerson) created "
+            for org in creator["/organization/organization_founder/organizations_founded"]:
+                out = out + "<" + org["a:name"] + ">, "
+        print out
+        i = i + 1
 
 
 #def search(key, precision, query):
@@ -289,5 +289,5 @@ if __name__ == "__main__":
     if args.query and args.queryType == INFOBOX:
         getInfobox(args.query, args.key)
     elif args.query and args.queryType == QUESTION:
-				getAnswer(args.query, args.key)
+                getAnswer(args.query, args.key)
 
