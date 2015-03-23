@@ -56,7 +56,7 @@ def getAnswer(query, key):
     query2 = [{
                 "/organization/organization_founder/organizations_founded": [{
                   "a:name": None,
-                  "name~=": "Google"
+                  "name~=": entity
                 }],
                 "name": None,
                 "type": "/organization/organization_founder"
