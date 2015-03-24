@@ -223,13 +223,15 @@ def printPersonInfo(properties):
     printOneInfo(properties, ["/people/deceased_person/place_of_death", "values", 0, "text"], "Place of Death")
     deathCauseList = getOneInfo(properties, ["/people/deceased_person/cause_of_death", "values"])
     printListInfo(deathCauseList, ["text"], "Causes of Death")
-    print "Siblings: "
-    for value in properties["/people/person/sibling_s"]["values"]:
-        print "%s" % value["property"]["/people/sibling_relationship/sibling"]["values"][0]["text"]
-    print "-----------"
-    print "Spouses: "
-    # TODO: Continue
-    
+    # Siblings
+    siblingsList = getOneInfo(properties, ["/people/person/sibling_s", "values"])
+    printListInfo(siblingsList, ["property", "/people/sibling_relationship/sibling", "values", 0, "text"], "Siblings")
+    # Spouses
+    spousesList = getOneInfo(properties, ["/people/person/spouse_s", "values"]) 
+    printListInfo(spousesList, ["property", "/people/marriage/spouse", "values", 0, "text"], "Spouses")
+    # Description
+    printOneInfo(properties, ["/common/topic/description", "values", 0, "value"], "Description")
+
 def freebaseTopic(mid, key):
     """
     Queries the Freebase Topic API for infobox
