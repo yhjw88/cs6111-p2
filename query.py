@@ -30,6 +30,83 @@ FETTOINDEX = {
             "/sports/professional_sports_team":SPORTSTEAM
             }
 
+def getOneInfo(container, keys):
+    """
+    Given a dictionary or list c and the array of keys [k1, k2, k3 ...]
+    This will return the member of the container c[k1][k2][k3]... if it exists
+    If not, it just returns None
+    @param container
+    @param keys
+    @return None if none, or the member of the dictionary if it exists
+    """
+    current = container
+    for key in keys:
+        if isinstance(current, dict): 
+            if key in current:
+                current = current[key]
+            else:
+                return None
+        elif (key < len(current)):
+            current = current[key]
+        else:
+            return None
+
+    return current
+
+def getListInfo(theList, keys):
+    """
+    Given the containing list l, and array of keys [k1, k2, k3 ...]
+    This iterates through that list, and for each element
+    It adds element[k1][k2][k3] ... to the returned list
+    @param theList
+    @param keys
+    @return A list of the member elements, or None if none
+    """
+    toReturn = []
+    for container in theList:
+        value = getOneInfo(container, keys)
+        if value:
+            toReturn.append(value)
+    if len(toReturn) == 0:
+        return None
+    return toReturn
+
+def printOneInfo(properties, keys, name):
+    """
+    Given the list of properties and the array of keys [k1, k2, k3 ...]
+    This will print the infobox entry located at properties[k1][k2][k3]... if it exists
+    It prints nothing if the entry doesn't exist
+    @param properties
+    @param keys
+    @param name The name given to the infobox entry to be printed out
+    """
+    # TODO: Needs to print in prettier fashion
+    value = getOneInfo(properties, keys)
+    if value:
+        print "%s: \n%s" % (name, value)
+        print "-----------"
+
+def printListInfo(theList, keys, name):
+    """
+    Given the containing list l, and array of keys [k1, k2, k3 ...]
+    This iterates through that list, and for each element
+    It prints element[k1][k2][k3] ... if it exists
+    If theList is None, or there is no info to print, nothing is printed
+    @param theList
+    @param keys
+    @param name The name given to the infobox entry to be printed out
+    """
+    # TODO: Needs to print in prettier fashion
+    if not theList:
+        return
+    values = getListInfo(theList, keys)
+    if not values:
+        return
+    print "%s:" % name
+    for value in values: 
+        print value
+    print "-----------"
+
 def getAnswer(query, key):
     # extract entity from question query
     entity = query[12:]
@@ -88,67 +165,6 @@ def getAnswer(query, key):
         print out
         i = i + 1
 
-
-#def search(key, precision, query):
-#    """
-#    Performs the actual loop of querying, asking user, query expansion
-#    Assumes that the params passed in are valid
-#    @param key The Bing key
-#    @param precision The requested precision, as a float
-#    @param query The initial user query
-#    """
-#    numRelevant = 0
-#    while True:
-#        print ""
-#        print "======================"
-#        print "Query: " + query
-#        results = makeQuery(key, query)
-#        numItems = 0
-#        numRelevant = 0
-#
-#        print "======================"
-#        print "y = relevant"
-#        print "n = not relevant"
-#        print "Anything else = quit"
-#        print "======================"
-#        for item in results:
-#            numItems += 1
-#            print "Result " + str(numItems)
-#            print "["
-#            print " URL: " + item['Url']
-#            print " Title: " + item['Title']
-#            print " Summary: " + item['Description']
-#            print "]\n"
-#            relevant = raw_input("Relevant (y/n)?")
-#            if relevant == 'Y' or relevant == 'y':
-#                item['relevant'] = 1
-#                numRelevant += 1
-#            elif relevant == 'N' or relevant == 'n':
-#                item['relevant'] = 0
-#            else:
-#                print "Bye!"
-#                return
-#
-#        if (numItems < NUMRESULTS):
-#            print "Error: Not enough results, only %d found" % numItems
-#            return
-#        if (numRelevant <= 0):
-#            print "Error: Nothing was marked relevant, exiting"
-#            return
-#        print "Query: %s" % query
-#        print "Precision: %.1f" % (numRelevant / float(NUMRESULTS))
-#        if numRelevant < precision * NUMRESULTS:
-#            docs = strip_docs(results)
-#            termScores = getScores(query, docs)
-#            if numRelevant < 2:
-#                query = expandQueryRocchio(query, termScores)
-#            else:
-#                query = expandQueryClique(query, termScores, docs)
-#            query = orderQuery(query, docs)
-#        else:
-#            print "Precision reached, exiting"
-#            return
-
 def freebaseSearch(query, key):
     """
     Queries the Freebase Search API
@@ -192,6 +208,28 @@ def getEntityTypes(properties):
 
     return entityTypes
 
+def printPersonInfo(properties):
+    """
+    Prints infobox info for entity type "person"
+    @param properties
+    """
+    # Name, Birthday, Place of Birth
+    print "-----------"
+    printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
+    printOneInfo(properties, ["/people/person/date_of_birth", "values", 0, "text"], "Birthday")
+    printOneInfo(properties, ["/people/person/place_of_birth", "values", 0, "text"], "Place of Birth")
+    # Death
+    printOneInfo(properties, ["/people/deceased_person/date_of_death", "values", 0, "text"], "Death Date")
+    printOneInfo(properties, ["/people/deceased_person/place_of_death", "values", 0, "text"], "Place of Death")
+    deathCauseList = getOneInfo(properties, ["/people/deceased_person/cause_of_death", "values"])
+    printListInfo(deathCauseList, ["text"], "Causes of Death")
+    print "Siblings: "
+    for value in properties["/people/person/sibling_s"]["values"]:
+        print "%s" % value["property"]["/people/sibling_relationship/sibling"]["values"][0]["text"]
+    print "-----------"
+    print "Spouses: "
+    # TODO: Continue
+    
 def freebaseTopic(mid, key):
     """
     Queries the Freebase Topic API for infobox
@@ -215,7 +253,7 @@ def freebaseTopic(mid, key):
         return False
     properties = results["property"]
 
-    # Get Entity Types
+    # Get entity types
     entityTypes = getEntityTypes(properties)
     success = False
     for value in entityTypes:
@@ -225,10 +263,9 @@ def freebaseTopic(mid, key):
     if not success:
         return False
 
-    # TODO: Formatting
-    # TODO: Get infobox properties
+    # Print the properties given the entity type
     if entityTypes[PERSON]:
-        print "Person"
+        printPersonInfo(properties)
     if entityTypes[AUTHOR]:
         print "Author"
     if entityTypes[ACTOR]:
@@ -289,5 +326,5 @@ if __name__ == "__main__":
     if args.query and args.queryType == INFOBOX:
         getInfobox(args.query, args.key)
     elif args.query and args.queryType == QUESTION:
-                getAnswer(args.query, args.key)
+        getAnswer(args.query, args.key)
 
