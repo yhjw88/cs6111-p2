@@ -128,9 +128,10 @@ def printOneInfo(properties, keys, name):
     # TODO: Needs to print in prettier fashion
     value = getOneInfo(properties, keys)
     if value:
-        print "%s: \n%s" % (name, value)
-        print "-----------"
-
+        name = "| " + name + ":"
+        print name.ljust(20), value
+        print " ----------------------------------------------------------------------------------"
+    
 def printListInfo(theList, keys, name):
     """
     Given the containing list l, and array of keys [k1, k2, k3 ...]
@@ -147,10 +148,11 @@ def printListInfo(theList, keys, name):
     values = getListInfo(theList, keys)
     if not values:
         return
-    print "%s:" % name
-    for value in values:
-        print value
-    print "-----------"
+    name = "| " + name + ":"
+    for value in values: 
+        print name.ljust(20), value
+        name = ""
+    print " ----------------------------------------------------------------------------------"
 
 def getAnswer(query, key):
     # extract entity from question query
@@ -259,7 +261,7 @@ def printPersonInfo(properties):
     @param properties
     """
     # Name, Birthday, Place of Birth
-    print "-----------"
+    print " ----------------------------------------------------------------------------------"
     printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
     printOneInfo(properties, ["/people/person/date_of_birth", "values", 0, "text"], "Birthday")
     printOneInfo(properties, ["/people/person/place_of_birth", "values", 0, "text"], "Place of Birth")
@@ -387,8 +389,8 @@ def printLeagueInfo(properties):
     Prints infobox info for entity type "league"
     @param properties
     """
-    # Name, Sport
-    print "-----------"
+    # Name, Sport 
+    print "-----------------------------------------------------------------------------------"
     printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
     printOneInfo(properties, ["/sports/sports_league/sport", "values", 0, "text"], "Sport")
     # Slogans
@@ -411,7 +413,7 @@ def printSportsTeamInfo(properties):
     @param properties
     """
     # Name, Sport, Founded
-    print "-----------"
+    print "-----------------------------------------------------------------------------------"
     printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
     printOneInfo(properties, ["/sports/sports_team/sport", "values", 0, "text"], "Sport")
     printOneInfo(properties, ["/sports/sports_team/founded", "values", 0, "text"], "Founded")
@@ -522,18 +524,18 @@ def freebaseTopic(mid, key):
         return False
 
     # Print the properties given the entity type
-#    if entityTypes[PERSON]:
-#        printPersonInfo(properties)
+    if entityTypes[PERSON]:
+        printPersonInfo(properties)
     if entityTypes[AUTHOR]:
         printAuthorInfo(properties)
     if entityTypes[ACTOR]:
         printActorInfo(properties)
     if entityTypes[BUSINESSPERSON]:
         printBusinessPersonInfo(properties)
-#    if entityTypes[LEAGUE]:
-#        printLeagueInfo(properties)
-#    if entityTypes[SPORTSTEAM]:
-#        printSportsTeamInfo(properties)
+    if entityTypes[LEAGUE]:
+        printLeagueInfo(properties)
+    if entityTypes[SPORTSTEAM]:
+        printSportsTeamInfo(properties)
 
     return True
 
