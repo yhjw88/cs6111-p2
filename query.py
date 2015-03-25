@@ -53,6 +53,30 @@ def getOneInfo(container, keys):
 
     return current
 
+def getOneInfoMult(container, multKeys):
+    """
+    Extension of getOneInfo()
+    The multKeys is an array of arrays [[k11, k12, k13 ...], [k21, k22 ...] ...]
+    This will return an array [element[k11][k12][k13]..., element[k21][k22]..., ...]
+    None is added to each array for each missing element
+    @param theList
+    @param keys
+    @return None if the array is only has None, or the array if it has atleast one not None element
+    """
+    elementArray = []
+    for keys in multKeys:
+        value = getOneInfo(container, keys)
+        elementArray.append(value)
+    empty = True
+    for element in elementArray:
+        if element:
+            empty = False
+            break
+    if empty:
+        return None
+    else:
+        return elementArray
+ 
 def getListInfo(theList, keys):
     """
     Given the containing list l, and array of keys [k1, k2, k3 ...]
@@ -71,6 +95,27 @@ def getListInfo(theList, keys):
         return None
     return toReturn
 
+def getListInfoMult(theList, multKeys):
+    """
+    Extension of getListInfo()
+    The multKeys is an array of arrays [[k11, k12, k13 ...], [k21, k22 ...] ...]
+    This iterates through the given list, and for each element
+    It adds an array [element[k11][k12][k13]..., element[k21][k22]..., ...] to the returned list
+    None is added to each array for each missing element
+    Nothing is added to the returned list for every array that only contains None
+    @param theList
+    @param keys
+    @return A list of arrays, each containing the specified member elements, or None if none
+    """
+    toReturn = []
+    for container in theList:
+        elementArray = getOneInfoMult(container, multKeys)
+        if elementArray:
+            toReturn.append(elementArray)
+    if len(toReturn) == 0:
+        return None
+    return toReturn
+
 def printOneInfo(properties, keys, name):
     """
     Given the list of properties and the array of keys [k1, k2, k3 ...]
@@ -85,7 +130,7 @@ def printOneInfo(properties, keys, name):
     if value:
         print "%s: \n%s" % (name, value)
         print "-----------"
-
+    
 def printListInfo(theList, keys, name):
     """
     Given the containing list l, and array of keys [k1, k2, k3 ...]
@@ -238,6 +283,7 @@ def printLeagueInfo(properties):
     @param properties
     """
     # Name, Sport 
+    print "-----------"
     printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
     printOneInfo(properties, ["/sports/sports_league/sport", "values", 0, "text"], "Sport")
     # Slogans
@@ -253,6 +299,46 @@ def printLeagueInfo(properties):
     printListInfo(teamsList, ["property", "/sports/sports_league_participation/team", "values", 0, "text"], "Teams")
     # Description
     printOneInfo(properties, ["/common/topic/description", "values", 0, "value"], "Description")
+
+def printSportsTeamInfo(properties):
+    """
+    Prints infobox infor for entity type "sports team"
+    @param properties
+    """
+    # Name, Sport, Founded
+    print "-----------"
+    printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
+    printOneInfo(properties, ["/sports/sports_team/sport", "values", 0, "text"], "Sport")
+    printOneInfo(properties, ["/sports/sports_team/founded", "values", 0, "text"], "Founded")
+    # Locations
+    locationsList = getOneInfo(properties, ["/sports/sports_team/location", "values"])
+    printListInfo(locationsList, ["text"], "Locations")
+    # Arenas (Venues)
+    arenasList = getOneInfo(properties, ["/sports/sports_team/venue", "values"])
+    if arenasList:
+        arenasInfo = getListInfoMult(arenasList, [["property", "/sports/team_venue_relationship/venue", "values", 0, "text"],
+                                                  ["property", "/sports/team_venue_relationship/from", "values", 0, "text"],
+                                                  ["property", "/sports/team_venue_relationship/to", "values", 0, "text"]])
+        if arenasInfo:
+            print "Arenas:"
+            for arenaInfo in arenasInfo:
+                if not arenaInfo[1]:
+                    arenaInfo[1] = ""
+                if not arenaInfo[2]:
+                    arenaInfo[2] = ""
+                if arenaInfo[0]:
+                    print "%s (%s-%s)" % (arenaInfo[0], arenaInfo[1], arenaInfo[2])
+            print "-----------"
+    # Leagues
+    leaguesList = getOneInfo(properties, ["/sports/sports_team/league", "values"])
+    printListInfo(leaguesList, ["property", "/sports/sports_league_participation/league", "values", 0, "text"], "Leagues")
+    # Championships
+    championshipsList = getOneInfo(properties, ["/sports/sports_team/championships", "values"])
+    printListInfo(championshipsList, ["text"], "Championships")
+    # TODO:
+    # Coaches (Name, Position, From, To)
+    # PlayersRoster (Name, Position, Number, From, To)
+    # Description
 
 def freebaseTopic(mid, key):
     """
@@ -299,7 +385,7 @@ def freebaseTopic(mid, key):
     if entityTypes[LEAGUE]:
         printLeagueInfo(properties)
     if entityTypes[SPORTSTEAM]:
-        print "Sports Team"
+        printSportsTeamInfo(properties)
 
     return True
 
