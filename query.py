@@ -471,7 +471,6 @@ def printSportsTeamInfo(properties):
                                                   ["property", "/sports/sports_team_roster/to", "values", 0, "text"]])
         if playersInfo:
             printCompoundList(playersInfo, "Players", ["Name", "Position", "Number", "From", "To"])
-            print "Players:"
 
     # Description
     printOneInfo(properties, ["/common/topic/description", "values", 0, "value"], "Description")
