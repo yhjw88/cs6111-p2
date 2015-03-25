@@ -440,10 +440,53 @@ def printSportsTeamInfo(properties):
     # Championships
     championshipsList = getOneInfo(properties, ["/sports/sports_team/championships", "values"])
     printListInfo(championshipsList, ["text"], "Championships")
-    # TODO:
     # Coaches (Name, Position, From, To)
+    coachesList = getOneInfo(properties, ["/sports/sports_team/coaches", "values"])
+    if coachesList:
+        coachesInfo = getListInfoMult(coachesList, [["property", "/sports/sports_team_coach_tenure/coach", "values", 0, "text"],
+                                                  ["property", "/sports/sports_team_coach_tenure/position", "values", 0, "text"],
+                                                  ["property", "/sports/sports_team_coach_tenure/from", "values", 0, "text"],
+                                                  ["property", "/sports/sports_team_coach_tenure/to", "values", 0, "text"]])
+        if coachesInfo:
+            print "Coaches:"
+            for coachInfo in coachesInfo:
+                if not coachInfo[0]:
+                    continue
+                toPrint = coachInfo[0]
+                if coachInfo[1]:
+                    toPrint += ", " + coachInfo[1]
+                if not coachInfo[2]:
+                    coachInfo[2] = ""
+                if not coachInfo[3]:
+                    coachInfo[3] = ""
+                print "%s (%s-%s)" % (toPrint, coachInfo[2], coachInfo[3])
+            print "-----------"
     # PlayersRoster (Name, Position, Number, From, To)
+    playersList = getOneInfo(properties, ["/sports/sports_team/roster", "values"])
+    if playersList:
+        playersInfo = getListInfoMult(playersList, [["property", "/sports/sports_team_roster/player", "values", 0, "text"],
+                                                  ["property", "/sports/sports_team_roster/position", "values", 0, "text"],
+                                                  ["property", "/sports/sports_team_roster/number", "values", 0, "text"],
+                                                  ["property", "/sports/sports_team_roster/from", "values", 0, "text"],
+                                                  ["property", "/sports/sports_team_roster/to", "values", 0, "text"]])
+        if playersInfo:
+            print "Players:"
+            for playerInfo in playersInfo:
+                if not playerInfo[0]:
+                    continue
+                toPrint = playerInfo[0]
+                if playerInfo[1]:
+                    toPrint += ", " + playerInfo[1]
+                if playerInfo[2]:
+                    toPrint += ", " + playerInfo[2]
+                if not playerInfo[3]:
+                    playerInfo[3] = ""
+                if not playerInfo[4]:
+                    playerInfo[4] = ""
+                print "%s (%s-%s)" % (toPrint, playerInfo[3], playerInfo[4])
+            print "-----------"
     # Description
+    printOneInfo(properties, ["/common/topic/description", "values", 0, "value"], "Description")
 
 def freebaseTopic(mid, key):
     """
