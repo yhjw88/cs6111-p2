@@ -3,6 +3,7 @@ import urllib2
 import json
 import sys
 import argparse
+from prettytable import PrettyTable
 
 # Usage constants
 INFOBOX = "infobox"
@@ -131,7 +132,7 @@ def printOneInfo(properties, keys, name):
         name = "| " + name + ":"
         print name.ljust(20), value
         print " ----------------------------------------------------------------------------------"
-    
+
 def printListInfo(theList, keys, name):
     """
     Given the containing list l, and array of keys [k1, k2, k3 ...]
@@ -149,10 +150,22 @@ def printListInfo(theList, keys, name):
     if not values:
         return
     name = "| " + name + ":"
-    for value in values: 
+    for value in values:
         print name.ljust(20), value
         name = ""
     print " ----------------------------------------------------------------------------------"
+
+    x = PrettyTable(["City name", "Area", "Population", "Annual Rainfall"])
+    x.align["City name"] = "l" # Left align city names
+    x.padding_width = 1 # One space between column edges and contents (default)
+    x.add_row(["Adelaide",1295, 1158259, 600.5])
+    x.add_row(["Brisbane",5905, 1857594, 1146.4])
+    x.add_row(["Darwin", 112, 120900, 1714.7])
+    x.add_row(["Hobart", 1357, 205556, 619.5])
+    x.add_row(["Sydney", 2058, 4336374, 1214.8])
+    x.add_row(["Melbourne", 1566, 3806092, 646.9])
+    x.add_row(["Perth", 5386, 1554769, 869.4])
+    print x
 
 def getAnswer(query, key):
     # extract entity from question query
@@ -389,7 +402,7 @@ def printLeagueInfo(properties):
     Prints infobox info for entity type "league"
     @param properties
     """
-    # Name, Sport 
+    # Name, Sport
     print "-----------------------------------------------------------------------------------"
     printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
     printOneInfo(properties, ["/sports/sports_league/sport", "values", 0, "text"], "Sport")
