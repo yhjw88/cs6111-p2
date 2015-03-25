@@ -41,7 +41,7 @@ def getOneInfo(container, keys):
     """
     current = container
     for key in keys:
-        if isinstance(current, dict): 
+        if isinstance(current, dict):
             if key in current:
                 current = current[key]
             else:
@@ -76,7 +76,7 @@ def getOneInfoMult(container, multKeys):
         return None
     else:
         return elementArray
- 
+
 def getListInfo(theList, keys):
     """
     Given the containing list l, and array of keys [k1, k2, k3 ...]
@@ -130,7 +130,7 @@ def printOneInfo(properties, keys, name):
     if value:
         print "%s: \n%s" % (name, value)
         print "-----------"
-    
+
 def printListInfo(theList, keys, name):
     """
     Given the containing list l, and array of keys [k1, k2, k3 ...]
@@ -148,7 +148,7 @@ def printListInfo(theList, keys, name):
     if not values:
         return
     print "%s:" % name
-    for value in values: 
+    for value in values:
         print value
     print "-----------"
 
@@ -272,17 +272,122 @@ def printPersonInfo(properties):
     siblingsList = getOneInfo(properties, ["/people/person/sibling_s", "values"])
     printListInfo(siblingsList, ["property", "/people/sibling_relationship/sibling", "values", 0, "text"], "Siblings")
     # Spouses
-    spousesList = getOneInfo(properties, ["/people/person/spouse_s", "values"]) 
+    spousesList = getOneInfo(properties, ["/people/person/spouse_s", "values"])
     printListInfo(spousesList, ["property", "/people/marriage/spouse", "values", 0, "text"], "Spouses")
     # Description
     printOneInfo(properties, ["/common/topic/description", "values", 0, "value"], "Description")
+
+def printBusinessPersonInfo(properties):
+    """
+    Prints infobox info for entity type "BusinessPerson"
+    @param properties
+    """
+    print "-----------"
+    print "businessperson"
+    print "-----------"
+
+    # Board Leader (From, To, Organization, Role, Title)
+    leadershipList = getOneInfo(properties, ["/business/board_member/leader_of", "values"])
+    leadershipInfoLists = getListInfoMult(leadershipList,
+        [["property", "/organization/leadership/from", "values", 0, "text"],
+         ["property", "/organization/leadership/to", "values", 0, "text"],
+         ["property", "/organization/leadership/organization", "values", 0, "text"],
+         ["property", "/organization/leadership/role", "values", 0, "text"],
+         ["property", "/organization/leadership/title", "values", 0, "text"]])
+    for leadershipInfo in leadershipInfoLists:
+        if leadershipInfo[2]:
+            print "Leader of " + leadershipInfo[2]
+        if leadershipInfo[0]:
+            print "from: " + leadershipInfo[0]
+        if leadershipInfo[1]:
+            print "to: " + leadershipInfo[1]
+        if leadershipInfo[3]:
+            print "in role: " + leadershipInfo[3]
+        if leadershipInfo[4]:
+            print "with title: " + leadershipInfo[4]
+        print "--------"
+
+    # Board Member (From, To, Organization, Role, Title)
+    boardMembershipList = getOneInfo(properties, ["/business/board_member/organization_board_memberships", "values"])
+    boardMembershipInfoLists = getListInfoMult(boardMembershipList,
+        [["property", "/organization/organization_board_membership/from", "values", 0, "text"],
+         ["property", "/organization/organization_board_membership/to", "values", 0, "text"],
+         ["property", "/organization/organization_board_membership/organization", "values", 0, "text"],
+         ["property", "/organization/organization_board_membership/role", "values", 0, "text"],
+         ["property", "/organization/organization_board_membership/title", "values", 0, "text"]])
+    for membershipInfo in boardMembershipInfoLists:
+        if membershipInfo[2]:
+            print "Member of " + membershipInfo[2]
+        if membershipInfo[0]:
+            print "from: " + membershipInfo[0]
+        if membershipInfo[1]:
+            print "to: " + membershipInfo[1]
+        if membershipInfo[3]:
+            print "in role: " + membershipInfo[3]
+        if membershipInfo[4]:
+            print "with title: " + membershipInfo[4]
+        print "--------"
+
+    # Founded (OrganizationName)
+    orgsFoundedList = getOneInfo(properties, ["/organization/organization_founder/organizations_founded", "values"])
+    printListInfo(orgsFoundedList, ["text"], "Organizations Founded")
+
+
+def printAuthorInfo(properties):
+    """
+    Prints infobox info for entity type "author"
+    @param properties
+    """
+    print "-----------"
+    print "author"
+    print "-----------"
+
+    # Books
+    booksList = getOneInfo(properties, ["/book/author/works_written", "values"])
+    printListInfo(booksList, ["text"], "Books Written")
+
+    # Books about the Author
+    booksAboutList = getOneInfo(properties, ["/book/book_subject/works", "values"])
+    printListInfo(booksAboutList, ["text"], "Books about the Author")
+
+    # Influenced
+    influencedList = getOneInfo(properties, ["/influence/influence_node/influenced", "values"])
+    printListInfo(influencedList, ["text"], "Influenced")
+
+    # Influenced By
+    influencedByList = getOneInfo(properties, ["/influence/influence_node/influenced_by", "values"])
+    printListInfo(influencedByList, ["text"], "Influenced By")
+
+
+def printActorInfo(properties):
+    """
+    Prints infobox info for entity type "actor"
+    @param properties
+    """
+
+    print "-----------"
+    print "actor"
+    print "-----------"
+
+    # Films Participated (Film Name, Character)
+    filmList = getOneInfo(properties, ["/film/actor/film", "values"])
+    if filmList:
+        filmInfoLists = getListInfoMult(filmList,
+            [["property", "/film/performance/film", "values", 0, "text"],
+             ["property", "/film/performance/character", "values", 0, "text"]])
+        for filmInfo in filmInfoLists:
+            if filmInfo[0]:
+                print "Acted in " + filmInfo[0]
+            if filmInfo[1]:
+                print "as character: " + filmInfo[1]
+            print "--------"
 
 def printLeagueInfo(properties):
     """
     Prints infobox info for entity type "league"
     @param properties
     """
-    # Name, Sport 
+    # Name, Sport
     print "-----------"
     printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
     printOneInfo(properties, ["/sports/sports_league/sport", "values", 0, "text"], "Sport")
@@ -374,18 +479,18 @@ def freebaseTopic(mid, key):
         return False
 
     # Print the properties given the entity type
-    if entityTypes[PERSON]:
-        printPersonInfo(properties)
+#    if entityTypes[PERSON]:
+#        printPersonInfo(properties)
     if entityTypes[AUTHOR]:
-        print "Author"
+        printAuthorInfo(properties)
     if entityTypes[ACTOR]:
-        print "Actor"
+        printActorInfo(properties)
     if entityTypes[BUSINESSPERSON]:
-        print "Business Person"
-    if entityTypes[LEAGUE]:
-        printLeagueInfo(properties)
-    if entityTypes[SPORTSTEAM]:
-        printSportsTeamInfo(properties)
+        printBusinessPersonInfo(properties)
+#    if entityTypes[LEAGUE]:
+#        printLeagueInfo(properties)
+#    if entityTypes[SPORTSTEAM]:
+#        printSportsTeamInfo(properties)
 
     return True
 
@@ -398,6 +503,7 @@ def getInfobox(query, key):
     """
     results = freebaseSearch(query, key)
     if not results:
+        print "unable to fetch results from freebase"
         return False
 
     success = False
@@ -415,7 +521,6 @@ if __name__ == "__main__":
     """
     Entry point, processes parameters
     """
-
     # Argument parsing
     parser = argparse.ArgumentParser(description="Does Freebase queries.", usage=USAGE)
     parser.add_argument("-key", required=True, dest="key")
@@ -437,4 +542,3 @@ if __name__ == "__main__":
         getInfobox(args.query, args.key)
     elif args.query and args.queryType == QUESTION:
         getAnswer(args.query, args.key)
-
