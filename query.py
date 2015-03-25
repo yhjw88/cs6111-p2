@@ -232,6 +232,20 @@ def printPersonInfo(properties):
     # Description
     printOneInfo(properties, ["/common/topic/description", "values", 0, "value"], "Description")
 
+def printLeagueInfo(properties):
+    """
+    Prints infobox info for entity type "league"
+    @param properties
+    """
+    # Name, Sport 
+    printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
+    printOneInfo(properties, ["/sports/sports_league/sport", "values", 0, "text"], "Sport")
+    # Slogans
+    slogansList = getOneInfo(properties, ["/organization/organization/slogan", "values"])
+    printListInfo(slogansList, ["text"], "Slogans")
+    # Official Websites
+    # Championship
+
 def freebaseTopic(mid, key):
     """
     Queries the Freebase Topic API for infobox
@@ -275,7 +289,7 @@ def freebaseTopic(mid, key):
     if entityTypes[BUSINESSPERSON]:
         print "Business Person"
     if entityTypes[LEAGUE]:
-        print "League"
+        printLeagueInfo(properties)
     if entityTypes[SPORTSTEAM]:
         print "Sports Team"
 
