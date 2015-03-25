@@ -191,6 +191,27 @@ def printList(values, name):
     vals = vals[:-1]
     box.add_row([name, vals])
 
+def printCompoundList(values, name, subnames):
+    """
+    Print list where each entry can have subinformation
+    @param values An array of arrays, where each array represents one list entry
+    @param name The overarching name for the type of information
+    @param subnames The set of names for possible pieces of subinformation in an entry
+    Note: the subnames must be in the same order as they appear in the subarrays
+    """
+    entries = []
+    for value in values:
+        entry = ""
+        i = 0
+        while i < len(value):
+            if value[i]:
+                entry = entry + subnames[i] + ": " + value[i] + " | "
+            i = i + 1
+        if len(entry) > 2:
+            entry = entry[:-2]
+            entries.append(entry)
+    printList(entries, name)
+
 def getAnswer(query, key):
     # extract entity from question query
     entity = query[12:]
@@ -322,53 +343,27 @@ def printBusinessPersonInfo(properties):
     """
     # Board Leader (From, To, Organization, Role, Title)
     leadershipList = getOneInfo(properties, ["/business/board_member/leader_of", "values"])
-    leadershipInfoLists = getListInfoMult(leadershipList,
-        [["property", "/organization/leadership/from", "values", 0, "text"],
-         ["property", "/organization/leadership/to", "values", 0, "text"],
-         ["property", "/organization/leadership/organization", "values", 0, "text"],
-         ["property", "/organization/leadership/role", "values", 0, "text"],
-         ["property", "/organization/leadership/title", "values", 0, "text"]])
-    pLeadershipInfoList = []
-    for leadershipInfo in leadershipInfoLists:
-        pLeadershipInfo = ""
-        if leadershipInfo[2]:
-            pLeadershipInfo = pLeadershipInfo + "Leader of " + leadershipInfo[2] + " | "
-        if leadershipInfo[0]:
-            pLeadershipInfo = pLeadershipInfo + "from: " + leadershipInfo[0] + " | "
-        if leadershipInfo[1]:
-            pLeadershipInfo = pLeadershipInfo + "to: " + leadershipInfo[1] + " | "
-        if leadershipInfo[3]:
-            pLeadershipInfo = pLeadershipInfo + "role: " + leadershipInfo[3] + " | "
-        if leadershipInfo[4]:
-            pLeadershipInfo = pLeadershipInfo + "title: " + leadershipInfo[4] + " | "
-        pLeadershipInfo = pLeadershipInfo[:-2]
-        pLeadershipInfoList.append(pLeadershipInfo)
-    printList(pLeadershipInfoList, "Board Leader\n(From, To, Organization, Role, Title)")
+    if leadershipList:
+        leadershipInfoLists = getListInfoMult(leadershipList,
+            [["property", "/organization/leadership/organization", "values", 0, "text"],
+             ["property", "/organization/leadership/from", "values", 0, "text"],
+             ["property", "/organization/leadership/to", "values", 0, "text"],
+             ["property", "/organization/leadership/role", "values", 0, "text"],
+             ["property", "/organization/leadership/title", "values", 0, "text"]])
+        if leadershipInfoLists:
+            printCompoundList(leadershipInfoLists, "Board Leader", ["Leader of", "From", "To", "Role", "Title"])
 
     # Board Member (From, To, Organization, Role, Title)
     membershipList = getOneInfo(properties, ["/business/board_member/organization_board_memberships", "values"])
-    membershipInfoLists = getListInfoMult(membershipList,
-        [["property", "/organization/organization_board_membership/from", "values", 0, "text"],
-         ["property", "/organization/organization_board_membership/to", "values", 0, "text"],
-         ["property", "/organization/organization_board_membership/organization", "values", 0, "text"],
-         ["property", "/organization/organization_board_membership/role", "values", 0, "text"],
-         ["property", "/organization/organization_board_membership/title", "values", 0, "text"]])
-    pMembershipInfoList = []
-    for membershipInfo in membershipInfoLists:
-        pMembershipInfo = ""
-        if membershipInfo[2]:
-            pMembershipInfo = pMembershipInfo + "Member of " + membershipInfo[2] + " | "
-        if membershipInfo[0]:
-            pMembershipInfo = pMembershipInfo + "from: " + membershipInfo[0] + " | "
-        if membershipInfo[1]:
-            pMembershipInfo = pMembershipInfo + "to: " + membershipInfo[1] + " | "
-        if membershipInfo[3]:
-            pMembershipInfo = pMembershipInfo + "role: " + membershipInfo[3] + " | "
-        if membershipInfo[4]:
-            pMembershipInfo = pMembershipInfo + "title: " + membershipInfo[4] + " | "
-        pMembershipInfo = pMembershipInfo[:-2]
-        pMembershipInfoList.append(pMembershipInfo)
-    printList(pMembershipInfoList, "Board Member\n(From, To, Organization, Role, Title)")
+    if membershipList:
+        membershipInfoLists = getListInfoMult(membershipList,
+            [["property", "/organization/organization_board_membership/organization", "values", 0, "text"],
+             ["property", "/organization/organization_board_membership/from", "values", 0, "text"],
+             ["property", "/organization/organization_board_membership/to", "values", 0, "text"],
+             ["property", "/organization/organization_board_membership/role", "values", 0, "text"],
+             ["property", "/organization/organization_board_membership/title", "values", 0, "text"]])
+        if membershipInfoLists:
+            printCompoundList(membershipInfoLists, "Board Member", ["Member of", "From", "To", "Role", "Title"])
 
     # Founded (OrganizationName)
     orgsFoundedList = getOneInfo(properties, ["/organization/organization_founder/organizations_founded", "values"])
@@ -404,16 +399,8 @@ def printActorInfo(properties):
         filmInfoLists = getListInfoMult(filmList,
             [["property", "/film/performance/film", "values", 0, "text"],
              ["property", "/film/performance/character", "values", 0, "text"]])
-        pFilmInfoList = []
-        for filmInfo in filmInfoLists:
-            pFilmInfo = ""
-            if filmInfo[0]:
-                pFilmInfo = pFilmInfo + "Acted in " + filmInfo[0] + " | "
-            if filmInfo[1]:
-                pFilmInfo = pFilmInfo + "as character: " + filmInfo[1] + " | "
-            pFilmInfo = pFilmInfo[:-2]
-            pFilmInfoList.append(pFilmInfo)
-        printList(pFilmInfoList, "FilmsParticipated\n(FilmName, Character)")
+        if filmInfoLists:
+            printCompoundList(filmInfoLists, "Films Participated", ["Film Name", "Character"])
 
 def printLeagueInfo(properties):
     """
@@ -452,21 +439,14 @@ def printSportsTeamInfo(properties):
     locationsList = getOneInfo(properties, ["/sports/sports_team/location", "values"])
     printListInfo(locationsList, ["text"], "Locations")
     # Arenas (Venues)
-    arenasList = getOneInfo(properties, ["/sports/sports_team/venue", "values"])
-    if arenasList:
-        arenasInfo = getListInfoMult(arenasList, [["property", "/sports/team_venue_relationship/venue", "values", 0, "text"],
+    arenaList = getOneInfo(properties, ["/sports/sports_team/venue", "values"])
+    if arenaList:
+        arenaInfoList = getListInfoMult(arenaList, [["property", "/sports/team_venue_relationship/venue", "values", 0, "text"],
                                                   ["property", "/sports/team_venue_relationship/from", "values", 0, "text"],
                                                   ["property", "/sports/team_venue_relationship/to", "values", 0, "text"]])
-        if arenasInfo:
-            print "Arenas:"
-            for arenaInfo in arenasInfo:
-                if not arenaInfo[1]:
-                    arenaInfo[1] = ""
-                if not arenaInfo[2]:
-                    arenaInfo[2] = ""
-                if arenaInfo[0]:
-                    print "%s (%s-%s)" % (arenaInfo[0], arenaInfo[1], arenaInfo[2])
-            print "-----------"
+        if arenaInfoList:
+            printCompoundList(arenaInfoList, "AreansParticipated", ["Venue", "From", "To"])
+
     # Leagues
     leaguesList = getOneInfo(properties, ["/sports/sports_team/league", "values"])
     printListInfo(leaguesList, ["property", "/sports/sports_league_participation/league", "values", 0, "text"], "Leagues")
@@ -481,19 +461,8 @@ def printSportsTeamInfo(properties):
                                                   ["property", "/sports/sports_team_coach_tenure/from", "values", 0, "text"],
                                                   ["property", "/sports/sports_team_coach_tenure/to", "values", 0, "text"]])
         if coachesInfo:
-            print "Coaches:"
-            for coachInfo in coachesInfo:
-                if not coachInfo[0]:
-                    continue
-                toPrint = coachInfo[0]
-                if coachInfo[1]:
-                    toPrint += ", " + coachInfo[1]
-                if not coachInfo[2]:
-                    coachInfo[2] = ""
-                if not coachInfo[3]:
-                    coachInfo[3] = ""
-                print "%s (%s-%s)" % (toPrint, coachInfo[2], coachInfo[3])
-            print "-----------"
+            printCompoundList(coachesInfo, "Coaches", ["Name", "Position", "From", "To"])
+
     # PlayersRoster (Name, Position, Number, From, To)
     playersList = getOneInfo(properties, ["/sports/sports_team/roster", "values"])
     if playersList:
@@ -503,21 +472,9 @@ def printSportsTeamInfo(properties):
                                                   ["property", "/sports/sports_team_roster/from", "values", 0, "text"],
                                                   ["property", "/sports/sports_team_roster/to", "values", 0, "text"]])
         if playersInfo:
+            printCompoundList(playersInfo, "Players", ["Name", "Position", "Number", "From", "To"])
             print "Players:"
-            for playerInfo in playersInfo:
-                if not playerInfo[0]:
-                    continue
-                toPrint = playerInfo[0]
-                if playerInfo[1]:
-                    toPrint += ", " + playerInfo[1]
-                if playerInfo[2]:
-                    toPrint += ", " + playerInfo[2]
-                if not playerInfo[3]:
-                    playerInfo[3] = ""
-                if not playerInfo[4]:
-                    playerInfo[4] = ""
-                print "%s (%s-%s)" % (toPrint, playerInfo[3], playerInfo[4])
-            print "-----------"
+
     # Description
     printOneInfo(properties, ["/common/topic/description", "values", 0, "value"], "Description")
 
