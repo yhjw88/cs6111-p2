@@ -408,7 +408,6 @@ def printLeagueInfo(properties):
     @param properties
     """
     # Name, Sport
-    print "-----------------------------------------------------------------------------------"
     printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
     printOneInfo(properties, ["/sports/sports_league/sport", "values", 0, "text"], "Sport")
     # Slogans
@@ -431,7 +430,6 @@ def printSportsTeamInfo(properties):
     @param properties
     """
     # Name, Sport, Founded
-    print "-----------------------------------------------------------------------------------"
     printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
     printOneInfo(properties, ["/sports/sports_team/sport", "values", 0, "text"], "Sport")
     printOneInfo(properties, ["/sports/sports_team/founded", "values", 0, "text"], "Founded")
