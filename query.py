@@ -162,7 +162,27 @@ def printListInfo(theList, keys, name):
 
     vals = ""
     for value in values:
-        val = ""
+        val = "* "
+        while len(value) > LINE_LENGTH:
+            val = val + value[:LINE_LENGTH] + "\n"
+            value = value [LINE_LENGTH:]
+        val = val + value
+        vals = vals + val + "\n"
+    vals = vals[:-1]
+    box.add_row([name, vals])
+
+def printList(values, name):
+    """
+    Directly print all the values in the list
+    @param values An array of values
+    @param name The name given to the infobox entry to be printed out
+    """
+    if not values:
+        return
+
+    vals = ""
+    for value in values:
+        val = "* "
         while len(value) > LINE_LENGTH:
             val = val + value[:LINE_LENGTH] + "\n"
             value = value [LINE_LENGTH:]
@@ -300,7 +320,6 @@ def printBusinessPersonInfo(properties):
     Prints infobox info for entity type "BusinessPerson"
     @param properties
     """
-
     # Board Leader (From, To, Organization, Role, Title)
     leadershipList = getOneInfo(properties, ["/business/board_member/leader_of", "values"])
     leadershipInfoLists = getListInfoMult(leadershipList,
@@ -309,39 +328,47 @@ def printBusinessPersonInfo(properties):
          ["property", "/organization/leadership/organization", "values", 0, "text"],
          ["property", "/organization/leadership/role", "values", 0, "text"],
          ["property", "/organization/leadership/title", "values", 0, "text"]])
+    pLeadershipInfoList = []
     for leadershipInfo in leadershipInfoLists:
+        pLeadershipInfo = ""
         if leadershipInfo[2]:
-            print "Leader of " + leadershipInfo[2]
+            pLeadershipInfo = pLeadershipInfo + "Leader of " + leadershipInfo[2] + " | "
         if leadershipInfo[0]:
-            print "from: " + leadershipInfo[0]
+            pLeadershipInfo = pLeadershipInfo + "from: " + leadershipInfo[0] + " | "
         if leadershipInfo[1]:
-            print "to: " + leadershipInfo[1]
+            pLeadershipInfo = pLeadershipInfo + "to: " + leadershipInfo[1] + " | "
         if leadershipInfo[3]:
-            print "in role: " + leadershipInfo[3]
+            pLeadershipInfo = pLeadershipInfo + "role: " + leadershipInfo[3] + " | "
         if leadershipInfo[4]:
-            print "with title: " + leadershipInfo[4]
-        print "--------"
+            pLeadershipInfo = pLeadershipInfo + "title: " + leadershipInfo[4] + " | "
+        pLeadershipInfo = pLeadershipInfo[:-2]
+        pLeadershipInfoList.append(pLeadershipInfo)
+    printList(pLeadershipInfoList, "Board Leader\n(From, To, Organization, Role, Title)")
 
     # Board Member (From, To, Organization, Role, Title)
-    boardMembershipList = getOneInfo(properties, ["/business/board_member/organization_board_memberships", "values"])
-    boardMembershipInfoLists = getListInfoMult(boardMembershipList,
+    membershipList = getOneInfo(properties, ["/business/board_member/organization_board_memberships", "values"])
+    membershipInfoLists = getListInfoMult(membershipList,
         [["property", "/organization/organization_board_membership/from", "values", 0, "text"],
          ["property", "/organization/organization_board_membership/to", "values", 0, "text"],
          ["property", "/organization/organization_board_membership/organization", "values", 0, "text"],
          ["property", "/organization/organization_board_membership/role", "values", 0, "text"],
          ["property", "/organization/organization_board_membership/title", "values", 0, "text"]])
-    for membershipInfo in boardMembershipInfoLists:
+    pMembershipInfoList = []
+    for membershipInfo in membershipInfoLists:
+        pMembershipInfo = ""
         if membershipInfo[2]:
-            print "Member of " + membershipInfo[2]
+            pMembershipInfo = pMembershipInfo + "Member of " + membershipInfo[2] + " | "
         if membershipInfo[0]:
-            print "from: " + membershipInfo[0]
+            pMembershipInfo = pMembershipInfo + "from: " + membershipInfo[0] + " | "
         if membershipInfo[1]:
-            print "to: " + membershipInfo[1]
+            pMembershipInfo = pMembershipInfo + "to: " + membershipInfo[1] + " | "
         if membershipInfo[3]:
-            print "in role: " + membershipInfo[3]
+            pMembershipInfo = pMembershipInfo + "role: " + membershipInfo[3] + " | "
         if membershipInfo[4]:
-            print "with title: " + membershipInfo[4]
-        print "--------"
+            pMembershipInfo = pMembershipInfo + "title: " + membershipInfo[4] + " | "
+        pMembershipInfo = pMembershipInfo[:-2]
+        pMembershipInfoList.append(pMembershipInfo)
+    printList(pMembershipInfoList, "Board Member\n(From, To, Organization, Role, Title)")
 
     # Founded (OrganizationName)
     orgsFoundedList = getOneInfo(properties, ["/organization/organization_founder/organizations_founded", "values"])
@@ -377,12 +404,16 @@ def printActorInfo(properties):
         filmInfoLists = getListInfoMult(filmList,
             [["property", "/film/performance/film", "values", 0, "text"],
              ["property", "/film/performance/character", "values", 0, "text"]])
+        pFilmInfoList = []
         for filmInfo in filmInfoLists:
+            pFilmInfo = ""
             if filmInfo[0]:
-                print "Acted in " + filmInfo[0]
+                pFilmInfo = pFilmInfo + "Acted in " + filmInfo[0] + " | "
             if filmInfo[1]:
-                print "as character: " + filmInfo[1]
-            print "--------"
+                pFilmInfo = pFilmInfo + "as character: " + filmInfo[1] + " | "
+            pFilmInfo = pFilmInfo[:-2]
+            pFilmInfoList.append(pFilmInfo)
+        printList(pFilmInfoList, "FilmsParticipated\n(FilmName, Character)")
 
 def printLeagueInfo(properties):
     """
