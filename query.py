@@ -244,7 +244,15 @@ def printLeagueInfo(properties):
     slogansList = getOneInfo(properties, ["/organization/organization/slogan", "values"])
     printListInfo(slogansList, ["text"], "Slogans")
     # Official Websites
+    websitesList = getOneInfo(properties, ["/common/topic/official_website", "values"])
+    printListInfo(websitesList, ["text"], "Websites")
     # Championship
+    printOneInfo(properties, ["/sports/sports_league/championship", "values", 0, "text"], "Championship")
+    # Teams
+    teamsList = getOneInfo(properties, ["/sports/sports_league/teams", "values"])
+    printListInfo(teamsList, ["property", "/sports/sports_league_participation/team", "values", 0, "text"], "Teams")
+    # Description
+    printOneInfo(properties, ["/common/topic/description", "values", 0, "value"], "Description")
 
 def freebaseTopic(mid, key):
     """
