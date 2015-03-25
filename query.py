@@ -4,6 +4,7 @@ import json
 import sys
 import argparse
 from prettytable import PrettyTable
+import prettytable
 
 # Usage constants
 INFOBOX = "infobox"
@@ -12,6 +13,8 @@ INTERACTIVE = "interactive"
 USAGE = ("python query.py -key <Freebase API Key> -q <query> -t <infobox|question>\n"
         "       python query.py -key <Freebase API Key> -f <file of queries> -t <infobox|question>\n"
         "       python query.py -key <Freebase API Key>")
+LINE_LENGTH = 50
+
 # Freebase Entity Types
 PERSON = 0
 AUTHOR = 1
@@ -30,6 +33,12 @@ FETTOINDEX = {
             "/sports/sports_team":SPORTSTEAM,
             "/sports/professional_sports_team":SPORTSTEAM
             }
+
+box = PrettyTable(["Attribute of Interest", "Details"])
+box.header = False
+box.padding_width = 1 # One space between column edges and contents (default)
+box.hrules = prettytable.ALL
+box.vrules = prettytable.ALL
 
 def getOneInfo(container, keys):
     """
@@ -126,12 +135,14 @@ def printOneInfo(properties, keys, name):
     @param keys
     @param name The name given to the infobox entry to be printed out
     """
-    # TODO: Needs to print in prettier fashion
     value = getOneInfo(properties, keys)
     if value:
-        name = "| " + name + ":"
-        print name.ljust(20), value
-        print " ----------------------------------------------------------------------------------"
+        val = ""
+        while len(value) > LINE_LENGTH:
+            val = val + value[:LINE_LENGTH] + "\n"
+            value = value [LINE_LENGTH:]
+        val = val + value
+        box.add_row([name, val])
 
 def printListInfo(theList, keys, name):
     """
@@ -143,29 +154,22 @@ def printListInfo(theList, keys, name):
     @param keys
     @param name The name given to the infobox entry to be printed out
     """
-    # TODO: Needs to print in prettier fashion
     if not theList:
         return
     values = getListInfo(theList, keys)
     if not values:
         return
-    name = "| " + name + ":"
-    for value in values:
-        print name.ljust(20), value
-        name = ""
-    print " ----------------------------------------------------------------------------------"
 
-    x = PrettyTable(["City name", "Area", "Population", "Annual Rainfall"])
-    x.align["City name"] = "l" # Left align city names
-    x.padding_width = 1 # One space between column edges and contents (default)
-    x.add_row(["Adelaide",1295, 1158259, 600.5])
-    x.add_row(["Brisbane",5905, 1857594, 1146.4])
-    x.add_row(["Darwin", 112, 120900, 1714.7])
-    x.add_row(["Hobart", 1357, 205556, 619.5])
-    x.add_row(["Sydney", 2058, 4336374, 1214.8])
-    x.add_row(["Melbourne", 1566, 3806092, 646.9])
-    x.add_row(["Perth", 5386, 1554769, 869.4])
-    print x
+    vals = ""
+    for value in values:
+        val = ""
+        while len(value) > LINE_LENGTH:
+            val = val + value[:LINE_LENGTH] + "\n"
+            value = value [LINE_LENGTH:]
+        val = val + value
+        vals = vals + val + "\n"
+    vals = vals[:-1]
+    box.add_row([name, vals])
 
 def getAnswer(query, key):
     # extract entity from question query
@@ -274,7 +278,6 @@ def printPersonInfo(properties):
     @param properties
     """
     # Name, Birthday, Place of Birth
-    print " ----------------------------------------------------------------------------------"
     printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
     printOneInfo(properties, ["/people/person/date_of_birth", "values", 0, "text"], "Birthday")
     printOneInfo(properties, ["/people/person/place_of_birth", "values", 0, "text"], "Place of Birth")
@@ -297,9 +300,6 @@ def printBusinessPersonInfo(properties):
     Prints infobox info for entity type "BusinessPerson"
     @param properties
     """
-    print "-----------"
-    print "businessperson"
-    print "-----------"
 
     # Board Leader (From, To, Organization, Role, Title)
     leadershipList = getOneInfo(properties, ["/business/board_member/leader_of", "values"])
@@ -353,37 +353,24 @@ def printAuthorInfo(properties):
     Prints infobox info for entity type "author"
     @param properties
     """
-    print "-----------"
-    print "author"
-    print "-----------"
-
     # Books
     booksList = getOneInfo(properties, ["/book/author/works_written", "values"])
     printListInfo(booksList, ["text"], "Books Written")
-
     # Books about the Author
     booksAboutList = getOneInfo(properties, ["/book/book_subject/works", "values"])
     printListInfo(booksAboutList, ["text"], "Books about the Author")
-
     # Influenced
     influencedList = getOneInfo(properties, ["/influence/influence_node/influenced", "values"])
     printListInfo(influencedList, ["text"], "Influenced")
-
     # Influenced By
     influencedByList = getOneInfo(properties, ["/influence/influence_node/influenced_by", "values"])
     printListInfo(influencedByList, ["text"], "Influenced By")
-
 
 def printActorInfo(properties):
     """
     Prints infobox info for entity type "actor"
     @param properties
     """
-
-    print "-----------"
-    print "actor"
-    print "-----------"
-
     # Films Participated (Film Name, Character)
     filmList = getOneInfo(properties, ["/film/actor/film", "values"])
     if filmList:
@@ -549,6 +536,9 @@ def freebaseTopic(mid, key):
         printLeagueInfo(properties)
     if entityTypes[SPORTSTEAM]:
         printSportsTeamInfo(properties)
+
+    box.align = "l" # left align
+    print box
 
     return True
 
