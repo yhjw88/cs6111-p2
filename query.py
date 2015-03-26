@@ -1,10 +1,12 @@
 import urllib
 import urllib2
 import json
-import sys
 import argparse
 from prettytable import PrettyTable
 import prettytable
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 # Usage constants
 INFOBOX = "infobox"
@@ -33,7 +35,6 @@ FETTOINDEX = {
             }
 WORKS_WRITTEN = "/book/author/works_written"
 ORGS_FOUNDED = "/organization/organization_founder/organizations_founded"
-
 # Color constants
 COLORS = {
          "purple":'\033[95m',
