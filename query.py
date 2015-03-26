@@ -251,11 +251,29 @@ def printCompoundList(values, name, subnames):
             entries.append(entry)
     printList(entries, name)
 
+def verifyAnswerQuery(query):
+    """
+    Checks to make sure query is in correct format
+    If it is close to correct format, returns it in the correct format
+    By close we mean starts with "Who Created"
+    Otherwise, it returns None
+    @param query
+    @return None if it is far from correct format, or the query in correct format
+    """
+    query = query.rstrip()
+    if query.lower().startswith("who created "):
+        if query[-1:] != '?':
+            query += '?'
+        query = "Who created " + query[12:]
+        return query
+    return None
+
 def getAnswer(query, key):
     # check if query in correct format
-    if query[0:12] != 'Who created ' or query[-1:] != '?':
+    query = verifyAnswerQuery(query)
+    if not query:
         print "Incorrect question format: please follow 'Who created X?'"
-        sys.exit(1)
+        return
 
     # extract entity from question query
     entity = query[12:]
@@ -658,13 +676,14 @@ def interactiveMode(key):
         sys.stdout.write(COLORS["red"] + "Enter query: " + COLORS["end"])
         sys.stdout.flush()
         query = raw_input()
+        answerQuery = verifyAnswerQuery(query)
         if query == "q":
             print "Exiting..."
             exit = True
-        elif not query.lower().startswith("who created"):
+        elif not answerQuery:
             getInfobox(query, key)
         else:
-            getAnswer(query, key)
+            getAnswer(answerQuery, key)
         print
 
 if __name__ == "__main__":
