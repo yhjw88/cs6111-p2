@@ -31,6 +31,9 @@ FETTOINDEX = {
             "/sports/sports_team":SPORTSTEAM,
             "/sports/professional_sports_team":SPORTSTEAM
             }
+WORKS_WRITTEN = "/book/author/works_written"
+ORGS_FOUNDED = "/organization/organization_founder/organizations_founded"
+
 # Color constants
 COLORS = {
          "purple":'\033[95m',
@@ -295,21 +298,43 @@ def getAnswer(query, key):
     response = response1["result"] + response2["result"]
     response.sort(key=lambda x: x["name"])
 
-    # output the results
-    # TODO: format output as "first, second, ..., and last"
+    # format the results as "[Name] (as [Author|BusinessPerson]) created
+    # [first], [second], ..., and [last]."
     i = 1
     for creator in response:
         out = str(i) + ". " + creator['name']
         if creator['type'] == "/book/author":
             out = out + " (as Author) created "
-            for work in creator["/book/author/works_written"]:
-                out = out + "<" + work["a:name"] + ">, "
+            size = len(creator[WORKS_WRITTEN])
+            if size == 1:
+                out = out + "<" + creator[WORKS_WRITTEN][0]["a:name"] + ">."
+            elif size == 2:
+                out = out + "<" + creator[WORKS_WRITTEN][0]["a:name"] + "> and "
+                out = out + "<" + creator[WORKS_WRITTEN][1]["a:name"] + ">."
+            elif size > 2:
+                j = 0
+                while j < size-1:
+                    out = out + "<" + creator[WORKS_WRITTEN][j]["a:name"] + ">, "
+                    j = j + 1
+                out = out + "and "
+                out = out + "<" + creator[WORKS_WRITTEN][j]["a:name"] + ">."
         elif creator['type'] == "/organization/organization_founder":
             out = out + " (as BusinessPerson) created "
-            for org in creator["/organization/organization_founder/organizations_founded"]:
-                out = out + "<" + org["a:name"] + ">, "
-        print out
+            size = len(creator[ORGS_FOUNDED])
+            if size == 1:
+                out = out + "<" + creator[ORGS_FOUNDED][0]["a:name"] + ">."
+            elif size == 2:
+                out = out + "<" + creator[ORGS_FOUNDED][0]["a:name"] + "> and "
+                out = out + "<" + creator[ORGS_FOUNDED][1]["a:name"] + ">."
+            elif size > 2:
+                j = 0
+                while j < size-1:
+                    out = out + "<" + creator[ORGS_FOUNDED][j]["a:name"] + ">, "
+                    j = j + 1
+                out = out + "and "
+                out = out + "<" + creator[ORGS_FOUNDED][j]["a:name"] + ">."
         i = i + 1
+        print out
 
 def freebaseSearch(query, key):
     """
@@ -612,7 +637,7 @@ def fileMode(fileName, key, queryType):
                 print "%sQuery: %s%s" % (COLORS["red"], line, COLORS["end"])
                 if queryType == INFOBOX:
                     getInfobox(line, key)
-                else: 
+                else:
                     getAnswer(line, key)
                 print
                 print
