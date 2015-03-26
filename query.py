@@ -5,8 +5,6 @@ import argparse
 from prettytable import PrettyTable
 import prettytable
 import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 # Usage constants
 INFOBOX = "infobox"
