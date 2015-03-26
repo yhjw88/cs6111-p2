@@ -611,6 +611,29 @@ def fileMode(fileName, key, queryType):
     except IOError as e:
         print "File error: %s" % e.strerror
 
+def interactiveMode(key):
+    """
+    Interacts with the user via command line
+    Any line that starts with "Who Created" considered question
+    All else considered query
+    @param key
+    """
+    print "Interactive mode chosen. Enter q to quit."
+    print
+    exit = False
+    while not exit:
+        sys.stdout.write(COLORS["red"] + "Enter query: " + COLORS["end"])
+        sys.stdout.flush()
+        query = raw_input()
+        if query == "q":
+            print "Exiting..."
+            exit = True
+        elif not query.lower().startswith("who created"):
+            getInfobox(query, key)
+        else:
+            getAnswer(query, key)
+        print
+
 if __name__ == "__main__":
     """
     Entry point, processes parameters
@@ -630,11 +653,11 @@ if __name__ == "__main__":
         parser.error("-q and -f cannot both be set")
 
     # Do actual work
-    # TODO: Do file and question mode
-    # TODO: Apparently interactive mode not required so...
     if args.query and args.queryType == INFOBOX:
         getInfobox(args.query, args.key)
     elif args.query and args.queryType == QUESTION:
         getAnswer(args.query, args.key)
     elif args.fileName:
         fileMode(args.fileName, args.key, args.queryType)
+    else:
+        interactiveMode(args.key)
