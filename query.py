@@ -173,7 +173,7 @@ def printListInfo(theList, keys, name):
     values = getListInfo(theList, keys)
     if not values:
         return
-    
+
     name = COLORS["bold"] + name + COLORS["end"]
     vals = ""
     for value in values:
@@ -219,11 +219,11 @@ def printCompoundList(values, name, subnames):
     name = COLORS["bold"] + name + COLORS["end"]
     entries = []
     for value in values:
-        entry = COLORS["darkcyan"] + "* " + COLORS["end"] 
+        entry = COLORS["darkcyan"] + "* " + COLORS["end"]
         i = 0
         while i < len(value):
             if value[i]:
-                current = COLORS["bold"] + subnames[i] + COLORS["end"] 
+                current = COLORS["bold"] + subnames[i] + COLORS["end"]
                 lineLength = LINE_LENGTH + len(current) - len(subnames[i])
                 current += ": " + value[i].replace("\n","")
                 first = True
@@ -241,6 +241,11 @@ def printCompoundList(values, name, subnames):
     printList(entries, name)
 
 def getAnswer(query, key):
+    # check if query in correct format
+    if query[0:12] != 'Who created ' or query[-1:] != '?':
+        print "Incorrect question format: please follow 'Who created X?'"
+        sys.exit(1)
+
     # extract entity from question query
     entity = query[12:]
     entity = entity[:-1]
