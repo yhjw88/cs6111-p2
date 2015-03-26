@@ -46,11 +46,19 @@ COLORS = {
          }
 # Infobox printing
 LINE_LENGTH = 60
-box = PrettyTable(["Attribute of Interest", "Details"])
-box.header = False
-box.padding_width = 1 # One space between column edges and contents (default)
-box.hrules = prettytable.ALL
-box.vrules = prettytable.ALL
+box = None
+
+def initializeInfobox():
+    """
+    Initializes infobox for printing
+    Uses global variable box
+    """
+    global box
+    box = PrettyTable(["Attribute of Interest", "Details"])
+    box.header = False
+    box.padding_width = 1 # One space between column edges and contents (default)
+    box.hrules = prettytable.ALL
+    box.vrules = prettytable.ALL
 
 def getOneInfo(container, keys):
     """
@@ -350,7 +358,7 @@ def printPersonInfo(properties):
     printOneInfo(properties, ["/type/object/name", "values", 0, "text"], "Name")
     printOneInfo(properties, ["/people/person/date_of_birth", "values", 0, "text"], "Birthday")
     printOneInfo(properties, ["/people/person/place_of_birth", "values", 0, "text"], "Place of Birth")
-    # Death
+    # Death (Place, Date, Cause)
     printOneInfo(properties, ["/people/deceased_person/date_of_death", "values", 0, "text"], "Death Date")
     printOneInfo(properties, ["/people/deceased_person/place_of_death", "values", 0, "text"], "Place of Death")
     deathCauseList = getOneInfo(properties, ["/people/deceased_person/cause_of_death", "values"])
@@ -537,6 +545,7 @@ def freebaseTopic(mid, key):
         return False
 
     # Print the properties given the entity type
+    initializeInfobox()
     if entityTypes[PERSON]:
         printPersonInfo(properties)
     if entityTypes[AUTHOR]:
@@ -578,6 +587,30 @@ def getInfobox(query, key):
 
     return True
 
+def fileMode(fileName, key, queryType):
+    """
+    Reads from a file of queries instead of from command line
+    @param fileName
+    @param key
+    @param queryType Either question of infobox
+    """
+    print
+    try:
+        with open(fileName, 'r') as inFile:
+            for line in inFile:
+                if line.isspace() or line == '':
+                    continue
+                line = line.rstrip()
+                print "%sQuery: %s%s" % (COLORS["red"], line, COLORS["end"])
+                if queryType == INFOBOX:
+                    getInfobox(line, key)
+                else: 
+                    getAnswer(line, key)
+                print
+                print
+    except IOError as e:
+        print "File error: %s" % e.strerror
+
 if __name__ == "__main__":
     """
     Entry point, processes parameters
@@ -603,3 +636,5 @@ if __name__ == "__main__":
         getInfobox(args.query, args.key)
     elif args.query and args.queryType == QUESTION:
         getAnswer(args.query, args.key)
+    elif args.fileName:
+        fileMode(args.fileName, args.key, args.queryType)
