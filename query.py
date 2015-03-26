@@ -13,8 +13,6 @@ INTERACTIVE = "interactive"
 USAGE = ("python query.py -key <Freebase API Key> -q <query> -t <infobox|question>\n"
         "       python query.py -key <Freebase API Key> -f <file of queries> -t <infobox|question>\n"
         "       python query.py -key <Freebase API Key>")
-LINE_LENGTH = 50
-
 # Freebase Entity Types
 PERSON = 0
 AUTHOR = 1
@@ -33,7 +31,21 @@ FETTOINDEX = {
             "/sports/sports_team":SPORTSTEAM,
             "/sports/professional_sports_team":SPORTSTEAM
             }
-
+# Color constants
+COLORS = {
+         "purple":'\033[95m',
+         "cyan":'\033[96m',
+         "darkcyan":'\033[36m',
+         "blue":'\033[94m',
+         "green":'\033[92m',
+         "yellow":'\033[93m',
+         "red":'\033[91m',
+         "bold":'\033[1m',
+         "underline":'\033[4m',
+         "end":'\033[0m'
+         }
+# Infobox printing
+LINE_LENGTH = 60
 box = PrettyTable(["Attribute of Interest", "Details"])
 box.header = False
 box.padding_width = 1 # One space between column edges and contents (default)
@@ -135,12 +147,14 @@ def printOneInfo(properties, keys, name):
     @param keys
     @param name The name given to the infobox entry to be printed out
     """
+    name = COLORS["bold"] + name + COLORS["end"]
     value = getOneInfo(properties, keys)
     if value:
+        value = value.replace("\n", "")
         val = ""
         while len(value) > LINE_LENGTH:
             val = val + value[:LINE_LENGTH] + "\n"
-            value = value [LINE_LENGTH:]
+            value = value[LINE_LENGTH:]
         val = val + value
         box.add_row([name, val])
 
@@ -159,13 +173,21 @@ def printListInfo(theList, keys, name):
     values = getListInfo(theList, keys)
     if not values:
         return
-
+    
+    name = COLORS["bold"] + name + COLORS["end"]
     vals = ""
     for value in values:
-        val = "* "
-        while len(value) > LINE_LENGTH:
-            val = val + value[:LINE_LENGTH] + "\n"
-            value = value [LINE_LENGTH:]
+        beginning = COLORS["darkcyan"] + "* " + COLORS["end"]
+        lineLength = LINE_LENGTH + len(beginning) - 2
+        value = beginning + value.replace("\n", "")
+        val = ""
+        first = True
+        while len(value) > lineLength:
+            val = val + value[:lineLength] + "\n"
+            value = value[lineLength:]
+            if first:
+                lineLength = LINE_LENGTH
+                first = False
         val = val + value
         vals = vals + val + "\n"
     vals = vals[:-1]
@@ -182,13 +204,8 @@ def printList(values, name):
 
     vals = ""
     for value in values:
-        val = "* "
-        while len(value) > LINE_LENGTH:
-            val = val + value[:LINE_LENGTH] + "\n"
-            value = value [LINE_LENGTH:]
-        val = val + value
-        vals = vals + val + "\n"
-    vals = vals[:-1]
+        vals = vals + value + "\n\n"
+    vals = vals[:-2]
     box.add_row([name, vals])
 
 def printCompoundList(values, name, subnames):
@@ -199,16 +216,27 @@ def printCompoundList(values, name, subnames):
     @param subnames The set of names for possible pieces of subinformation in an entry
     Note: the subnames must be in the same order as they appear in the subarrays
     """
+    name = COLORS["bold"] + name + COLORS["end"]
     entries = []
     for value in values:
-        entry = ""
+        entry = COLORS["darkcyan"] + "* " + COLORS["end"] 
         i = 0
         while i < len(value):
             if value[i]:
-                entry = entry + subnames[i] + ": " + value[i] + " | "
+                current = COLORS["bold"] + subnames[i] + COLORS["end"] 
+                lineLength = LINE_LENGTH + len(current) - len(subnames[i])
+                current += ": " + value[i].replace("\n","")
+                first = True
+                while len(current) > lineLength:
+                    entry = entry + current[:lineLength] + "\n"
+                    current = "  " + current[lineLength:]
+                    if first:
+                        lineLength = LINE_LENGTH
+                        first = False
+                entry += current + "\n  "
             i = i + 1
-        if len(entry) > 2:
-            entry = entry[:-2]
+        if len(entry) > 3:
+            entry = entry[:-3]
             entries.append(entry)
     printList(entries, name)
 
@@ -443,7 +471,7 @@ def printSportsTeamInfo(properties):
                                                   ["property", "/sports/team_venue_relationship/from", "values", 0, "text"],
                                                   ["property", "/sports/team_venue_relationship/to", "values", 0, "text"]])
         if arenaInfoList:
-            printCompoundList(arenaInfoList, "AreansParticipated", ["Venue", "From", "To"])
+            printCompoundList(arenaInfoList, "Arenas", ["Arena", "From", "To"])
 
     # Leagues
     leaguesList = getOneInfo(properties, ["/sports/sports_team/league", "values"])
