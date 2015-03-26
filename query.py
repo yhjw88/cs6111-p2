@@ -439,9 +439,10 @@ def printSportsTeamInfo(properties):
     # Arenas (Venues)
     arenaList = getOneInfo(properties, ["/sports/sports_team/venue", "values"])
     if arenaList:
-        arenaInfoList = getListInfoMult(arenaList, [["property", "/sports/team_venue_relationship/venue", "values", 0, "text"],
-                                                  ["property", "/sports/team_venue_relationship/from", "values", 0, "text"],
-                                                  ["property", "/sports/team_venue_relationship/to", "values", 0, "text"]])
+        arenaInfoList = getListInfoMult(arenaList,
+            [["property", "/sports/team_venue_relationship/venue", "values", 0, "text"],
+             ["property", "/sports/team_venue_relationship/from", "values", 0, "text"],
+             ["property", "/sports/team_venue_relationship/to", "values", 0, "text"]])
         if arenaInfoList:
             printCompoundList(arenaInfoList, "AreansParticipated", ["Venue", "From", "To"])
 
@@ -454,21 +455,23 @@ def printSportsTeamInfo(properties):
     # Coaches (Name, Position, From, To)
     coachesList = getOneInfo(properties, ["/sports/sports_team/coaches", "values"])
     if coachesList:
-        coachesInfo = getListInfoMult(coachesList, [["property", "/sports/sports_team_coach_tenure/coach", "values", 0, "text"],
-                                                  ["property", "/sports/sports_team_coach_tenure/position", "values", 0, "text"],
-                                                  ["property", "/sports/sports_team_coach_tenure/from", "values", 0, "text"],
-                                                  ["property", "/sports/sports_team_coach_tenure/to", "values", 0, "text"]])
+        coachesInfo = getListInfoMult(coachesList,
+            [["property", "/sports/sports_team_coach_tenure/coach", "values", 0, "text"],
+             ["property", "/sports/sports_team_coach_tenure/position", "values", 0, "text"],
+             ["property", "/sports/sports_team_coach_tenure/from", "values", 0, "text"],
+             ["property", "/sports/sports_team_coach_tenure/to", "values", 0, "text"]])
         if coachesInfo:
             printCompoundList(coachesInfo, "Coaches", ["Name", "Position", "From", "To"])
 
     # PlayersRoster (Name, Position, Number, From, To)
     playersList = getOneInfo(properties, ["/sports/sports_team/roster", "values"])
     if playersList:
-        playersInfo = getListInfoMult(playersList, [["property", "/sports/sports_team_roster/player", "values", 0, "text"],
-                                                  ["property", "/sports/sports_team_roster/position", "values", 0, "text"],
-                                                  ["property", "/sports/sports_team_roster/number", "values", 0, "text"],
-                                                  ["property", "/sports/sports_team_roster/from", "values", 0, "text"],
-                                                  ["property", "/sports/sports_team_roster/to", "values", 0, "text"]])
+        playersInfo = getListInfoMult(playersList,
+            [["property", "/sports/sports_team_roster/player", "values", 0, "text"],
+             ["property", "/sports/sports_team_roster/position", "values", 0, "text"],
+             ["property", "/sports/sports_team_roster/number", "values", 0, "text"],
+             ["property", "/sports/sports_team_roster/from", "values", 0, "text"],
+             ["property", "/sports/sports_team_roster/to", "values", 0, "text"]])
         if playersInfo:
             printCompoundList(playersInfo, "Players", ["Name", "Position", "Number", "From", "To"])
 
