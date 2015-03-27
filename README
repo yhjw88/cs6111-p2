@@ -1,22 +1,47 @@
 a) Your name and your partner's name and Columbia UNI
-yw2439 - Yunhe (John) Wang 
-em2852 - Esha Maharishi 
-
+    yw2439 - Yunhe (John) Wang 
+    em2852 - Esha Maharishi 
 
 b) A list of all the files that you are submitting
-README
-prettytable.py
-query.py
-transcript
+    README
+    prettytable.py
+    query.py
+    transcript
 
 c) A clear description of how to run your program
+    We wrote our program in python. Here is how to run:
 
+    python query.py -key <Freebase API key> -q <query> -t <infobox|question>
+    python query.py -key <Freebase API key> -f <file of queries> -t <infobox|question>
+    python query.py -key <Freebase API key>
+
+    Example for using infobox from the command line:
+    python query.py -key AIzaSyC4oBmJBvmdpExFT-yG_-6QGk03BgbvD0s -q 'Miami Heat' -t infobox
+
+    Example for using question from the command line:
+    python query.py -key AIzaSyC4oBmJBvmdpExFT-yG_-6QGk03BgbvD0s -q 'Who created Google?' -t question
 
 d) A clear description of the internal design of your project
 
+    The main function parses the command line arguments to determine which mode to run the query in.
+    There are two entrypoint functions for running the two separate types of queries (corresponding to parts 1 and 2 of the assignment).
+
+    For part 1, first we queried freebase search to get the mid for the query, then we iterated through the resulting mids and for each mid, we checked its entity types. If it matched at least one of our six entity types, then we printed out the information based on the matching entity type.
+    The most complex part of this process was parsing through the properties, for which we created a series of helper functions that get single items or lists at arbitrary "paths" in the JSON objects. In particular, the most complex of these was printing properties for which there were multiple values, such as the "Leadership(From, To, Organization, Role, Title)" property of a BusinessPerson. 
+    Additionally, we used the prettytable project (https://code.google.com/p/prettytable/) to format our output neatly.
+
+    Here is the list of mappings from freebase properties to entity properties:
+
+
+    For part 2, the query format is checked, and if it follows the format "Who created X?", then two separate MQL queries are issued to freebase for author and businessperson containing X and their results are joined, sorted alphabetically by the creator (author or businessperson), and formatted to print out in English as "first, second, ..., and last" (or the expected English output for lists of various lengths).
+    
 
 e) Freebase API Key and requests per second per user
-
+    Key: AIzaSyC4oBmJBvmdpExFT-yG_-6QGk03BgbvD0s
+    Requests per second per user: 50
 
 f) Any additional information that you consider significant 
 
+    Please note that we have color formatting for output that goes to the terminal, but if the output is redirected to a file then the file most likely won't support the color formatting and will therefore have some escape characters around any words that would have been color coded.
+    
+    Please also note that we encoded all strings as ascii from unicode using backslashescape, so some non-ascii characters may show up as backslash-escaped values.
