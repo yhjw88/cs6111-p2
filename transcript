@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------------------------------------------------------
 INFOBOX
 Transcript of run on CLIC
-NOTE: THIS WAS DIRECTLY COPIED FROM TERMINAL, USING OUTPUT REDIRECTION WILL RESULT IN TERMINAL CHARACTER COLORS BEING PRINTED 
+NOTE: THIS WAS DIRECTLY COPIED FROM TERMINAL, USING OUTPUT REDIRECTION WILL RESULT IN TERMINAL COLOR CHARACTERS BEING PRINTED 
 -----------------------------------------------------------------------------------------------------------------------------
 yw2439@delhi /home/yw2439/cs6111/cs6111-p2 $ python query.py -key AIzaSyC4oBmJBvmdpExFT-yG_-6QGk03BgbvD0s -f ../inquiries -t infobox
 
