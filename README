@@ -1,3 +1,12 @@
+IMPORTANT NOTES:
+1. We used prettytable for output formatting: http://code.google.com/p/prettytable/g
+2. We used terminal colors for output formatting. In particular: 
+    REDIRECTING STDOUT TO SOMETHING OTHER THAN THE TERMINAL MEANS THAT THE CHARACTERS FOR THE COLOR WILL BE PRINTED
+    THIS WILL MESS UP THE TABLE FORMATTING
+3. Because some terminals do not support Unicode, we converted output to ASCII:
+    Use this export if you're running into Unicode Errors:
+    export LC_ALL=en_US.UTF-8 
+
 a) Your name and your partner's name and Columbia UNI
     yw2439 - Yunhe (John) Wang 
     em2852 - Esha Maharishi 
