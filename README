@@ -5,12 +5,18 @@ em2852 - Esha Maharishi
 
 b) A list of all the files that you are submitting
 README
+prettytable.py
+query.py
+transcript
 
 c) A clear description of how to run your program
 
+
 d) A clear description of the internal design of your project
 
+
 e) Freebase API Key and requests per second per user
+
 
 f) Any additional information that you consider significant 
 
