@@ -166,7 +166,7 @@ def printOneInfo(properties, keys, name):
             val = val + value[:LINE_LENGTH] + "\n"
             value = value[LINE_LENGTH:]
         val = val + value
-        box.add_row([name, val])
+        box.add_row([name, val.encode('ascii', errors='backslashreplace')])
 
 def printListInfo(theList, keys, name):
     """
@@ -201,7 +201,7 @@ def printListInfo(theList, keys, name):
         val = val + value
         vals = vals + val + "\n"
     vals = vals[:-1]
-    box.add_row([name, vals])
+    box.add_row([name, vals.encode('ascii', errors='backslashreplace')])
 
 def printList(values, name):
     """
@@ -216,7 +216,7 @@ def printList(values, name):
     for value in values:
         vals = vals + value + "\n\n"
     vals = vals[:-2]
-    box.add_row([name, vals])
+    box.add_row([name, vals.encode('ascii', errors='backslashreplace')])
 
 def printCompoundList(values, name, subnames):
     """
@@ -351,7 +351,7 @@ def getAnswer(query, key):
                 out = out + "and "
                 out = out + "<" + creator[ORGS_FOUNDED][j]["a:name"] + ">."
         i = i + 1
-        print out
+        print out.encode('ascii', errors='backslashreplace')
 
 def freebaseSearch(query, key):
     """
