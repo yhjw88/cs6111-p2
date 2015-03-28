@@ -18,7 +18,7 @@ b) A list of all the files that you are submitting
     transcript
 
 c) A clear description of how to run your program
-    We wrote our program in python. Here is how to run:
+    We wrote our program in python. Here is how to run it (mimics the format of the reference implementation, except rather than run.sh, the python script query.py is used):
 
     python query.py -key <Freebase API key> -q <query> -t <infobox|question>
     python query.py -key <Freebase API key> -f <file of queries> -t <infobox|question>
@@ -35,16 +35,113 @@ d) A clear description of the internal design of your project
     The main function parses the command line arguments to determine which mode to run the query in.
     There are two entrypoint functions for running the two separate types of queries (corresponding to parts 1 and 2 of the assignment).
 
-    For part 1, first we queried freebase search to get the mid for the query, then we iterated through the resulting mids and for each mid, we checked its entity types. If it matched at least one of our six entity types, then we printed out the information based on the matching entity type.
-    The most complex part of this process was parsing through the properties, for which we created a series of helper functions that get single items or lists at arbitrary "paths" in the JSON objects. In particular, the most complex of these was printing properties for which there were multiple values, such as the "Leadership(From, To, Organization, Role, Title)" property of a BusinessPerson. 
+    For part 1, first we queried freebase search to get the mid for the query, then we iterated through the resulting mids and for each mid, we checked its entity types. If it matched at least one of our six entity types, then we printed out the required property information for the corresponding entity type(s).
+    The most complex part of this process was parsing through the properties, for which we created a series of helper functions that return single items or lists at arbitrary "paths" in the JSON objects. In particular, the most complex of these was printing properties for which there were multiple values, such as the "Leadership(From, To, Organization, Role, Title)" property of a BusinessPerson. For these properties, we used a printCompoundList function that took a series of paths and sub-property names to print correctly and uniformly across various types of compound properties.
+    In general, we isolated the retrieving and printing functionality in order to maintain a uniform printing standard (and to increase code modularity).
     Additionally, we used the prettytable project (https://code.google.com/p/prettytable/) to format our output neatly.
 
-    Here is the list of mappings from freebase properties to entity properties:
+    Here is the list of mappings from entities requested to freebase entities: 
 
+    person: "/people/person"
+    author: "/book/author"
+    actor: "/film/actor", "/tv/tv_actor"
+    businessperson: "/organization/organization_founder", "/business/board_member"
+    league: "/sports/sports_league"
+    sports team: "/sports/sports_team", "/sports/professional_sports_team"
+
+    Here is the list of mappings from requested properties to freebase properties used:
+
+    PERSON:
+        Name: "/type/object/name"
+        Birthday: "/people/person/date_of_birth"
+        Place of Birth: "/people/person/place_of_birth"
+        Death Date: "/people/deceased_person/date_of_death"
+        Death Place: "/people/deceased_person/place_of_death"
+        Death Cause: "/people/deceased_person/cause_of_death"
+        Siblings: "/people/person/sibling_s"
+        Spouses: "/people/person/spouse_s"
+        Description: "/common/topic/description"
+
+    AUTHOR:
+        Books: "/book/author/works_written"
+        Books about the author: "/book/book_subject/works"
+        Influenced: "/influence/influence_node/influenced"
+        Influenced by: "/influence/influence_node/influenced_by"
+
+    ACTOR:
+    *** Note: only films participated were listed, so if a TV actor did not participate in any films, no works were listed for them (since the assignment asked only for "FilmsParticipated")
+        Films Participated: "/film/actor/film"
+            Film Name: "/film/performance/film"
+            Character: "/film/performance/character"        
+
+    BUSINESSPERSON:
+        Leadership: "/business/board_member/leader_of"
+            Leader of: "/organization/leadership/organization"
+            From: "/organization/leadership/from"
+            To: "/organization/leadership/to"
+            Role: "/organization/leadership/role"
+            Title: "/organization/leadership/title"
+        Membership: "/business/board_member/organization_board_memberships"
+            Leader of: "/morganization/organizatoin_board_membership/organization"
+            From: "/organization/organization_board_membership/from"
+            To: "/organization/organization_board_membership/to"
+            Role: "/organization/organization_board_membership/role"
+            Title: "/organization/organization_board_membership/title"
+        Organizations Founded: "/organization/organization_founder/organizations_founded"   
+
+    LEAGUE:
+        Name: "/type/object/name"
+        Sport: "/sports/sports_league/sport"
+        Slogans: "/organization/organization/slogan"
+        Official Website: "/common/topic/official_website"
+        Championship: "/sports/sports_league/championship"
+        Teams: "/sports/sports_league/teams"
+        Description: "/common/topic/description"
+
+    SPORTS TEAM:
+        Name: "/type/object/name"
+        Sport: "/sports/sports_team/sport"
+        Founded: "/sports/sports_team/founded"
+        Locations: "/sports/sports_team/location"
+        Areans: "/sports/sports_team/venue"
+            Arena: "/sports/team_venue_relationship/venue"
+            From: "/sports/team_venue_relationship/from"
+            To: "/sports/team_venue_relationship/to"
+        Leagues: "/sports/sports_team/league"
+        Championships: "/sports/sports_team/championships"
+        Coaches: "/sports/sports_team/coaches"
+            Coach: "/sports?sports_team_coach_tenure/coach" 
+            Position: "/sports?sports_team_coach_tenure/position" 
+            From: "/sports?sports_team_coach_tenure/from" 
+            To: "/sports?sports_team_coach_tenure/to" 
+        Players Roster: "/sports/sports_team/roster"
+            Name: "/sports/sports_team_roster/player"
+            Position: "/sports/sports_team_roster/position
+            Number: "/sports/sports_team_roster/numberp
+            From: "/sports/sports_team_roster/from"
+            To: "/sports/sports_team_roster/to"
+        Description: "/common/topic/description"
+
+--
 
     For part 2, the query format is checked, and if it follows the format "Who created X?", then two separate MQL queries are issued to freebase for author and businessperson containing X and their results are joined, sorted alphabetically by the creator (author or businessperson), and formatted to print out in English as "first, second, ..., and last" (or the expected English output for lists of various lengths).
-    
 
+We used the "contain" functionality using the ~ operator, as shown in the example query below:
+
+    query1 = [{
+                "/book/author/works_written": [{
+                  "a:name": None,
+                  "name~=": entity
+                }],
+                "name": None,
+                "type": "/book/author"
+              }]
+
+We tested the queries using the suggested query editor at https://www.freebase.com/query.
+
+The output closely follows the output from the reference implementation.
+   
+ 
 e) Freebase API Key and requests per second per user
     Key: AIzaSyC4oBmJBvmdpExFT-yG_-6QGk03BgbvD0s
     Requests per second per user: 50
